@@ -18,9 +18,9 @@ def moveindex(move):
 def game2img(game):
     moves = [moveindex(move) for move in game.split()]
     turn = 0
-    board_black = [[0 for i in range(15)] for j in range(15)]
-    board_white = [[0 for i in range(15)] for j in range(15)]
-    board = [board_black, board_white]
+    board_black = numpy.zeros((15, 15), dtype='int32')
+    board_white = numpy.zeros((15, 15), dtype='float32')
+    board = numpy.array([board_black, board_white])
     b_data = []
     m_data = []
     for move in moves[:OPENING_N]:
@@ -37,7 +37,7 @@ def game2img(game):
             print('error')
         board[turn][i][j] = 1
         turn = 1 - turn
-    return b_data, m_data
+    return numpy.array(b_data), m_data
         
 
 def ol_data(filename):
@@ -53,8 +53,8 @@ def ol_data(filename):
     for i, game in enumerate(root):
         board_string = game.find('board').text
         data[i] = game2img(board_string)
-    data_x = [x for d in data for x in d[0]]
-    data_y = [y for d in data for y in d[1]]
+    data_x = [x.reshape(2*15*15) for d in data for x in d[0]]
+    data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
 
     def shared_dataset(data_xy, borrow=True):
         """ Function that loads the dataset into shared variables
@@ -91,10 +91,11 @@ def ol_data(filename):
                                        data_y[:n_train]))
     validate_x, validate_y = shared_dataset((data_x[n_train:n_validate],
                                              data_y[n_train:n_validate]))
-    test_x, text_y = shared_dataset((data_x[n_validate:n_test],
+    test_x, test_y = shared_dataset((data_x[n_validate:n_test],
                                      data_y[n_validate:n_test]))
     
-    print('shape of x is {}'.format(train_x.get_value(borrow=True).shape))
+    rval = [(train_x, train_y), (validate_x, validate_y), (test_x, test_y)]
+    return rval
 
 if __name__ == '__main__':
     ol_data('../data/games.xml')
