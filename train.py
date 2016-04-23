@@ -48,11 +48,15 @@ def ol_data(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     if DEBUG:
-        root = root[:50]
-    data = [None for g in root]
+        root = root[:50000]
+    data = []
     for i, game in enumerate(root):
         board_string = game.find('board').text
-        data[i] = game2img(board_string)
+        if not board_string or'--' in board_string:
+            pass
+        else:
+            data.append(game2img(board_string))
+    print("total data: {}".format(len(data)))
     data_x = [x.reshape(2*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
 
@@ -81,12 +85,14 @@ def ol_data(filename):
         # lets ous get around this issue
         return shared_x, T.cast(shared_y, 'int32')
 
-    n_validate = 200
-    n_test = 200
+    n_validate = 4000
+    n_test = 4000
     n_train = len(data_x) - n_validate - n_test
     n_validate = n_train + n_validate
     n_test = n_validate + n_test
     
+    print('total train data: {}'.format(n_train))
+
     train_x, train_y = shared_dataset((data_x[:n_train],
                                        data_y[:n_train]))
     validate_x, validate_y = shared_dataset((data_x[n_train:n_validate],
