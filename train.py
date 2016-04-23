@@ -48,7 +48,7 @@ def ol_data(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     if DEBUG:
-        root = root[:50000]
+        root = root[:500]
     data = []
     for i, game in enumerate(root):
         board_string = game.find('board').text
@@ -85,8 +85,8 @@ def ol_data(filename):
         # lets ous get around this issue
         return shared_x, T.cast(shared_y, 'int32')
 
-    n_validate = 4000
-    n_test = 4000
+    n_validate = 400
+    n_test = 400
     n_train = len(data_x) - n_validate - n_test
     n_validate = n_train + n_validate
     n_test = n_validate + n_test

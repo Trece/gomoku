@@ -26,6 +26,7 @@ import os
 import sys
 import timeit
 
+import pickle
 import numpy
 
 import theano
@@ -115,6 +116,183 @@ class LeNetConvPoolLayer:
 
         # keep track of model input
         self.input = input
+
+
+class ConvNetwork:
+    def __init__(self, nkerns=[30, 50], batch_size=20):
+        self.rng = numpy.random.RandomState(23455)
+
+        self.batch_size = batch_size
+
+        # allocate symbolic variables for the data
+        self.index = T.lscalar()  # index to a [mini]batch
+
+        # start-snippet-1
+        self.x = T.matrix('x')   # the data is presented as rasterized images
+        self.y = T.ivector('y')  # the labels are presented as 1D vector of
+    
+        print('... building the model')
+
+        self.layer0_input = self.x.reshape((self.batch_size, 2, 15, 15))
+
+        self.layer0 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer0_input,
+            image_shape=(self.batch_size, 2, 15, 15),
+            filter_shape=(nkerns[0], 2, 11, 11),
+            poolsize=(1, 1))
+
+        self.layer1 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer0.output,
+            image_shape=(self.batch_size, nkerns[0], 15, 15),
+            filter_shape=(nkerns[1], nkerns[0], 7, 7),
+            poolsize=(1, 1))
+
+        self.layer2 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer1.output,
+            image_shape=(self.batch_size, nkerns[1], 15, 15),
+            filter_shape=(1, nkerns[1], 1, 1),
+            poolsize=(1, 1))
+    
+        self.layer2_output = T.nnet.softmax(self.layer2.output.flatten(2))
+        self.params = self.layer2.params + self.layer1.params + self.layer0.params
+
+    def train(self, dataset='../data/games.xml', n_epochs=200, learning_rate=0.1):
+        datasets = ol_data(dataset)
+
+        train_set_x, train_set_y = datasets[0]
+        valid_set_x, valid_set_y = datasets[1]
+        test_set_x, test_set_y = datasets[2]
+    
+    
+        # compute number of minibatches for training, validation and testing
+        n_train_batches = train_set_x.get_value(borrow=True).shape[0]
+        n_valid_batches = valid_set_x.get_value(borrow=True).shape[0]
+        n_test_batches = test_set_x.get_value(borrow=True).shape[0]
+        n_train_batches //= self.batch_size
+        n_valid_batches //= self.batch_size
+        n_test_batches //= self.batch_size
+
+        cost = -T.mean(T.log(
+                self.layer2_output[T.arange(self.y.shape[0]), self.y]))
+        error = T.mean(T.neq(T.argmax(self.layer2_output, axis=1), self.y))
+
+        params = self.params
+        grads = T.grad(cost, params)
+        updates = [
+            (param_i, param_i - learning_rate * grad_i)
+            for param_i, grad_i in zip(params, grads)
+            ]
+
+        index = self.index
+        batch_size = self.batch_size
+        x = self.x
+        y = self.y
+
+        test_model = theano.function(
+            [index],
+            error,
+            givens={
+                x: test_set_x[index * batch_size: (index + 1) * batch_size],
+                y: test_set_y[index * batch_size: (index + 1) * batch_size]
+                }
+            )
+
+        validate_model = theano.function(
+            [index],
+            error,
+            givens={
+                x: valid_set_x[index * batch_size: (index + 1) * batch_size],
+                y: valid_set_y[index * batch_size: (index + 1) * batch_size]
+                }
+            )
+        
+        train_model = theano.function(
+            [index],
+            cost,
+            updates=updates,
+            givens={
+                x: train_set_x[index * batch_size: (index + 1) * batch_size],
+                y: train_set_y[index * batch_size: (index + 1) * batch_size]
+                }
+            )
+
+        print('... training')
+        # early-stopping parameters
+        patience = 10000  # look as this many examples regardless
+        patience_increase = 2  # wait this much longer when a new best is found
+        improvement_threshold = 0.995
+        validation_frequency = min(n_train_batches, patience // 2)
+                                  # go through this many
+                                  # minibatche before checking the network
+                                  # on the validation set; in this case we
+                                  # check every epoch
+
+        best_validation_loss = numpy.inf
+        best_iter = 0
+        test_score = 0.
+        start_time = timeit.default_timer()
+        
+        epoch = 0
+        done_looping = False
+
+        while (epoch < n_epochs):
+            epoch = epoch + 1
+            for minibatch_index in range(n_train_batches):
+                
+                iter = (epoch - 1) * n_train_batches + minibatch_index
+            
+                if iter % 100 == 0:
+                    print('training @ iter = ', iter)
+                cost_ij = train_model(minibatch_index)
+
+                if (iter + 1) % validation_frequency == 0:
+
+                    # compute zero-one loss on validation set
+                    validation_losses = [validate_model(i) for i
+                                         in range(n_valid_batches)]
+                    this_validation_loss = numpy.mean(validation_losses)
+                    print('epoch {}i, minibatch {}/{}, validation error {}%'.format(
+                            epoch, minibatch_index + 1, n_train_batches,
+                            this_validation_loss * 100.))
+
+                    # if we got the best validation score until now
+                    if this_validation_loss < best_validation_loss:
+
+                    
+                        if this_validation_loss < best_validation_loss *  \
+                                improvement_threshold:
+                            patience = max(patience, iter * patience_increase)
+
+                        # save best validation score and iteration number
+                            best_validation_loss = this_validation_loss
+                            best_iter = iter
+
+                    # test it on the test set
+                    test_losses = [
+                        test_model(i)
+                        for i in range(n_test_batches)
+                    ]
+                    test_score = numpy.mean(test_losses)
+                    print(('     epoch {}, minibatch {}/{}, test error of '
+                           'best model {}%').format(
+                            epoch, minibatch_index + 1, n_train_batches,
+                            test_score * 100.))
+
+            
+        end_time = timeit.default_timer()
+        print('Optimization complete.')
+        print('Best validation score of %f %% obtained at iteration %i, '
+              'with test performance %f %%' %
+              (best_validation_loss * 100., best_iter + 1, test_score * 100.))
+        print(('The code for file ' +
+               os.path.split(__file__)[1] +
+               ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
+
+    def predict(self, data):
+        
 
 def evaluate_lenet5(learning_rate=0.1, n_epochs=200,
                     dataset='../data/games.xml',
@@ -324,8 +502,10 @@ def evaluate_lenet5(learning_rate=0.1, n_epochs=200,
            ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
 
 if __name__ == '__main__':
-    evaluate_lenet5(n_epochs=10)
-
+    network = ConvNetwork()
+    network.train(n_epochs=1)
+    with open('trained.mod', 'w') as savefile:
+        pickle.dump(network, savefile)
 
 def experiment(state, channel):
     evaluate_lenet5(state.learning_rate, dataset=state.dataset)
