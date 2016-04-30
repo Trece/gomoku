@@ -2,6 +2,8 @@ import xml.etree.ElementTree as ET
 from copy import deepcopy
 from pprint import pprint
 
+import pickle
+
 import numpy
 import theano
 import theano.tensor as T
@@ -48,7 +50,7 @@ def ol_data(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     if DEBUG:
-        root = root[:500]
+        root = root[:50000]
     data = []
     for i, game in enumerate(root):
         board_string = game.find('board').text
@@ -85,21 +87,24 @@ def ol_data(filename):
         # lets ous get around this issue
         return shared_x, T.cast(shared_y, 'int32')
 
-    n_validate = 400
-    n_test = 400
+    n_validate = 10000
+    n_test = 40
     n_train = len(data_x) - n_validate - n_test
     n_validate = n_train + n_validate
     n_test = n_validate + n_test
     
     print('total train data: {}'.format(n_train))
-
+    with open('test_results', 'w') as f:
+        print(data_y[n_validate:n_test], file=f)
+    test_xy = (data_x[n_validate:n_test], data_y[n_validate:n_test])
+    with open('test_case.pkl', 'wb') as f:
+        pickle.dump(test_xy, f)
     train_x, train_y = shared_dataset((data_x[:n_train],
                                        data_y[:n_train]))
     validate_x, validate_y = shared_dataset((data_x[n_train:n_validate],
                                              data_y[n_train:n_validate]))
     test_x, test_y = shared_dataset((data_x[n_validate:n_test],
                                      data_y[n_validate:n_test]))
-    
     rval = [(train_x, train_y), (validate_x, validate_y), (test_x, test_y)]
     return rval
 

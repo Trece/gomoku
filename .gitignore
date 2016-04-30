@@ -1,4 +1,8 @@
 *~
 *.pyc
 *__pycache__*
+*png
+*mod
+*res
+.DS_Store
 output
