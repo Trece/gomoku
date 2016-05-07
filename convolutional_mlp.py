@@ -121,7 +121,7 @@ class LeNetConvPoolLayer:
 
 
 class ConvNetwork:
-    def __init__(self, nkerns=[30, 50], batch_size=20):
+    def __init__(self, nkerns=[100, 100, 50], batch_size=20):
         self.rng = numpy.random.RandomState(23455)
 
         self.batch_size = batch_size
@@ -155,11 +155,18 @@ class ConvNetwork:
             self.rng,
             input=self.layer1.output,
             image_shape=(self.batch_size, nkerns[1], 15, 15),
-            filter_shape=(1, nkerns[1], 1, 1),
+            filter_shape=(nkerns[2], nkerns[1], 5, 5),
+            poolsize=(1, 1))
+
+        self.layer3 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer2.output,
+            image_shape=(self.batch_size, nkerns[2], 15, 15),
+            filter_shape=(1, nkerns[2], 1, 1),
             poolsize=(1, 1))
     
-        self.layer2_output = T.nnet.softmax(self.layer2.output.flatten(2))
-        self.params = self.layer2.params + self.layer1.params + self.layer0.params
+        self.layer3_output = T.nnet.softmax(self.layer3.output.flatten(2))
+        self.params = self.layer3.params + self.layer2.params + self.layer1.params + self.layer0.params
 
     def train(self, train_sets, valid_sets, test_sets, 
               n_epochs=200, learning_rate=0.1):
@@ -176,8 +183,8 @@ class ConvNetwork:
         n_test_batches //= self.batch_size
 
         cost = -T.mean(T.log(
-                self.layer2_output[T.arange(self.y.shape[0]), self.y]))
-        error = T.mean(T.neq(T.argmax(self.layer2_output, axis=1), self.y))
+                self.layer3_output[T.arange(self.y.shape[0]), self.y]))
+        error = T.mean(T.neq(T.argmax(self.layer3_output, axis=1), self.y))
 
         params = self.params
         grads = T.grad(cost, params)
@@ -298,7 +305,7 @@ class ConvNetwork:
         n_batches = set_x.get_value(borrow=True).shape[0]
         n_batches //= self.batch_size
 
-        prediction = self.layer2_output
+        prediction = self.layer3_output
 
         index = self.index
         x = self.x
