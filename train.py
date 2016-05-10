@@ -82,7 +82,7 @@ def game2img(game):
 #                     if sit[1-turn][b-1][i, j]:
 #                         if check_n(board[1-turn], (i, j), b+1):
 #                             sit[1-turn][b][i, j] = 1
-        b_data.append(deepcopy([board[turn], board[1-turn]),
+        b_data.append(deepcopy([board[turn], board[1-turn]]))
 #                                 sit[turn][1], sit[turn][2], 
 #                                 sit[turn][3], sit[turn][4],
 #                                 sit[1-turn][1], sit[1-turn][2],
