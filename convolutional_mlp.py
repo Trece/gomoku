@@ -259,7 +259,7 @@ class ConvNetwork:
                 iter = (epoch - 1) * n_train_batches + minibatch_index
             
                 if iter % 100 == 0:
-                    print('training @ iter = ', iter)
+                    print('training @ iter = ', iter, flush=True)
                 cost_ij = train_model(minibatch_index)
 
                 if (iter + 1) % validation_frequency == 0:
