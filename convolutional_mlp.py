@@ -121,7 +121,7 @@ class LeNetConvPoolLayer:
 
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 50], batch_size=20):
+    def __init__(self, nkerns=[100, 100, 50, 50], batch_size=20):
         self.rng = numpy.random.RandomState(23455)
 
         self.batch_size = batch_size
@@ -312,7 +312,7 @@ class ConvNetwork:
         n_batches = set_x.get_value(borrow=True).shape[0]
         n_batches //= self.batch_size
 
-        prediction = self.layer3_output
+        prediction = self.layer4_output
 
         index = self.index
         x = self.x
