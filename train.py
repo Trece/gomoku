@@ -69,24 +69,24 @@ def game2img(game):
         sit = numpy.zeros((2, 5, 15, 15), dtype='int32')
         sit[0][0] = 1
         sit[1][0] = 1
-        for b in range(1, 5):
-            for i in range(15):
-                for j in range(15):
-                    if sit[turn][b-1][i, j]:
-                        if check_n(board[turn], (i, j), b+1):
-                            sit[turn][b][i, j] = 1
+#         for b in range(1, 5):
+#             for i in range(15):
+#                 for j in range(15):
+#                     if sit[turn][b-1][i, j]:
+#                         if check_n(board[turn], (i, j), b+1):
+#                             sit[turn][b][i, j] = 1
         
-        for b in range(1, 5):
-            for i in range(15):
-                for j in range(15):
-                    if sit[1-turn][b-1][i, j]:
-                        if check_n(board[1-turn], (i, j), b+1):
+#         for b in range(1, 5):
+#             for i in range(15):
+#                 for j in range(15):
+#                     if sit[1-turn][b-1][i, j]:
+#                         if check_n(board[1-turn], (i, j), b+1):
                             sit[1-turn][b][i, j] = 1
-        b_data.append(deepcopy([board[turn], board[1-turn],
-                                sit[turn][1], sit[turn][2], 
-                                sit[turn][3], sit[turn][4],
-                                sit[1-turn][1], sit[1-turn][2],
-                                sit[1-turn][3], sit[1-turn][4]]))
+        b_data.append(deepcopy([board[turn], board[1-turn]),
+#                                 sit[turn][1], sit[turn][2], 
+#                                 sit[turn][3], sit[turn][4],
+#                                 sit[1-turn][1], sit[1-turn][2],
+#                                 sit[1-turn][3], sit[1-turn][4]]))
         # print(b_data[-1])
         m_data.append(move)
         i, j = move
@@ -117,7 +117,7 @@ def ol_data(filename):
             print('no{}'.format(i))
     print("total data: {}".format(len(data)))
     # print(data)
-    data_x = [x.reshape(10*15*15) for d in data for x in d[0]]
+    data_x = [x.reshape(2*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
 
     def shared_dataset(data_xy, borrow=True):

@@ -135,12 +135,12 @@ class ConvNetwork:
     
         print('... building the model')
 
-        self.layer0_input = self.x.reshape((self.batch_size, 10, 15, 15))
+        self.layer0_input = self.x.reshape((self.batch_size, 2, 15, 15))
 
         self.layer0 = LeNetConvPoolLayer(
             self.rng,
             input=self.layer0_input,
-            image_shape=(self.batch_size, 10, 15, 15),
+            image_shape=(self.batch_size, 2, 15, 15),
             filter_shape=(nkerns[0], 10, 11, 11),
             poolsize=(1, 1))
 
@@ -162,11 +162,18 @@ class ConvNetwork:
             self.rng,
             input=self.layer2.output,
             image_shape=(self.batch_size, nkerns[2], 15, 15),
-            filter_shape=(1, nkerns[2], 1, 1),
+            filter_shape=(1, nkerns[2], 5, 5),
             poolsize=(1, 1))
     
-        self.layer3_output = T.nnet.softmax(self.layer3.output.flatten(2))
-        self.params = self.layer3.params + self.layer2.params + self.layer1.params + self.layer0.params
+        self.layer4 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer3.output,
+            image_shape=(self.batch_size, nkerns[3], 15, 15),
+            filter_shape=(1, nkerns[3], 1, 1),
+            poolsize=(1, 1))
+
+        self.layer4_output = T.nnet.softmax(self.layer4.output.flatten(2))
+        self.params = self.layer4.params + self.layer3.params + self.layer2.params + self.layer1.params + self.layer0.params
 
     def train(self, train_sets, valid_sets, test_sets, 
               n_epochs=200, learning_rate=0.1):
@@ -183,8 +190,8 @@ class ConvNetwork:
         n_test_batches //= self.batch_size
 
         cost = -T.mean(T.log(
-                self.layer3_output[T.arange(self.y.shape[0]), self.y]))
-        error = T.mean(T.neq(T.argmax(self.layer3_output, axis=1), self.y))
+                self.layer4_output[T.arange(self.y.shape[0]), self.y]))
+        error = T.mean(T.neq(T.argmax(self.layer4_output, axis=1), self.y))
 
         params = self.params
         grads = T.grad(cost, params)
@@ -331,7 +338,7 @@ class ConvNetwork:
 if __name__ == '__main__':
     network = ConvNetwork()
     datasets = ol_data('../data/games.xml')
-    network.train(datasets[0], datasets[1], datasets[2], n_epochs=1)
+    network.train(datasets[0], datasets[1], datasets[2], n_epochs=5)
 #     with open('trained.mod', 'rb') as savefile:
 #         network.load(pickle.load(savefile))
 #     p = network.predict(datasets[2][0])
