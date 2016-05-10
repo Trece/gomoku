@@ -66,9 +66,9 @@ def game2img(game):
         board[turn][i][j] = 1
         turn = 1 - turn
     for move in moves[OPENING_N:]:
-        sit = numpy.zeros((2, 5, 15, 15), dtype='int32')
-        sit[0][0] = 1
-        sit[1][0] = 1
+#         sit = numpy.zeros((2, 5, 15, 15), dtype='int32')
+#         sit[0][0] = 1
+#         sit[1][0] = 1
 #         for b in range(1, 5):
 #             for i in range(15):
 #                 for j in range(15):
@@ -81,7 +81,7 @@ def game2img(game):
 #                 for j in range(15):
 #                     if sit[1-turn][b-1][i, j]:
 #                         if check_n(board[1-turn], (i, j), b+1):
-                            sit[1-turn][b][i, j] = 1
+#                             sit[1-turn][b][i, j] = 1
         b_data.append(deepcopy([board[turn], board[1-turn]),
 #                                 sit[turn][1], sit[turn][2], 
 #                                 sit[turn][3], sit[turn][4],
