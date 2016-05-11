@@ -342,7 +342,7 @@ if __name__ == '__main__':
     if filename:
         params = pickle.load(open(filename, 'rb'))
         network.load(params)
-    exit()
+        print('using {} as a start'.format(filename))
     datasets = ol_data('../data/games.xml')
     network.train(datasets[0], datasets[1], datasets[2], n_epochs=5)
 #     with open('trained.mod', 'rb') as savefile:
