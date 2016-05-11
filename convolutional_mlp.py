@@ -335,8 +335,14 @@ class ConvNetwork:
         for p, value in zip(self.params, values):
             p.set_value(value)
 
+
 if __name__ == '__main__':
     network = ConvNetwork()
+    filename = sys.argv[1]
+    if filename:
+        params = pickle.load(open(filename, 'rb'))
+        network.load(params)
+    exit()
     datasets = ol_data('../data/games.xml')
     network.train(datasets[0], datasets[1], datasets[2], n_epochs=5)
 #     with open('trained.mod', 'rb') as savefile:
