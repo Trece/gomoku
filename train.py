@@ -17,6 +17,11 @@ def moveindex(move):
     col = int(move[1:]) - 1
     return row, col
 
+class Board:
+    def __init__(self):
+        self.black_board = [[0 for i in range(15)] for j in range(15)]
+        self.white_board = [[0 for i in range(15)] for j in range(15)]
+
 def check_n(board, pos, n):
     diff = [[1, 1], [0, 1], [1, -1], [1, 0]] 
     i0 = pos[0]
