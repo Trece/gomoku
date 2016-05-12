@@ -181,7 +181,7 @@ class ConvNetwork:
             image_shape=(self.batch_size, nkerns[4], 15, 15),
             filter_shape=(1, nkerns[4], 1, 1),
             poolsize=(1, 1),
-            None)
+            activate=None)
 
 
         self.final_output = T.nnet.softmax(self.layer5.output.flatten(2))
