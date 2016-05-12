@@ -348,8 +348,8 @@ class ConvNetwork:
 
 if __name__ == '__main__':
     network = ConvNetwork()
-    filename = sys.argv[1]
-    if filename:
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
         params = pickle.load(open(filename, 'rb'))
         network.load(params)
         print('using {} as a start'.format(filename))
