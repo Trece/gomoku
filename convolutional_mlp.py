@@ -43,7 +43,7 @@ numpy.set_printoptions(threshold=numpy.nan)
 class LeNetConvPoolLayer:
     """Pool Layer of a convolutional network """
 
-    def __init__(self, rng, input, filter_shape, image_shape, poolsize=(2, 2)):
+    def __init__(self, rng, input, filter_shape, image_shape, poolsize=(2, 2), activate=T.nnet.relu):
         """
         Allocate a LeNetConvPoolLayer with shared variable internal parameters.
 
@@ -111,7 +111,10 @@ class LeNetConvPoolLayer:
         # reshape it to a tensor of shape (1, n_filters, 1, 1). Each bias will
         # thus be broadcasted across mini-batches and feature map
         # width & height
-        self.output = T.nnet.softplus(pooled_out + self.b.dimshuffle('x', 0, 'x', 'x'))
+        if activate:
+            self.output = activate(pooled_out + self.b.dimshuffle('x', 0, 'x', 'x'))
+        else:
+            self.output = pooled_out + self.b.dimshuffle('x', 0, 'x', 'x')
 
         # store parameters of this layer
         self.params = [self.W, self.b]
@@ -177,7 +180,8 @@ class ConvNetwork:
             input=self.layer4.output,
             image_shape=(self.batch_size, nkerns[4], 15, 15),
             filter_shape=(1, nkerns[4], 1, 1),
-            poolsize=(1, 1))
+            poolsize=(1, 1),
+            None)
 
 
         self.final_output = T.nnet.softmax(self.layer5.output.flatten(2))
