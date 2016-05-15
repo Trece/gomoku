@@ -188,7 +188,7 @@ def ol_win_data(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     if DEBUG:
-        root = root[:1000]
+        root = root[:50000]
     data = []
     for i, game in enumerate(root):
         if i % 50 == 0:
@@ -207,8 +207,8 @@ def ol_win_data(filename):
     data_y = [d[1] for d in data]
     print(data_y)
 
-    n_validate = 100
-    n_test = 40
+    n_validate = 3000
+    n_test = 100
     n_train = len(data_x) - n_validate - n_test
     n_validate = n_train + n_validate
     n_test = n_validate + n_test
