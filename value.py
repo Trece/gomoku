@@ -10,8 +10,8 @@ import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.nnet import conv2d
 
-from logistic_sgd import load_data
-from train import ol_move_data
+from logistic_sgd import load_data, LinearNetwork
+from train import ol_win_data
 from mlp import HiddenLayer
 from convolutional_mlp import LeNetConvPoolLayer
 
@@ -19,7 +19,7 @@ from convolutional_mlp import LeNetConvPoolLayer
 numpy.set_printoptions(threshold=numpy.nan)
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 50, 50, 25], batch_size=20):
+    def __init__(self, nkerns=[100, 100, 1], batch_size=20):
         '''
         nkerns: an array representing how many filters each layer has
         batch_size: a integer indicates batch size
@@ -63,37 +63,26 @@ class ConvNetwork:
             self.rng,
             input=self.layer1.output,
             image_shape=(self.batch_size, nkerns[1], 15, 15),
-            filter_shape=(nkerns[2], nkerns[1], 7, 7),
+            filter_shape=(nkerns[2], nkerns[1], 5, 5),
             poolsize=(1, 1))
 
-        self.layer3 = LeNetConvPoolLayer(
-            self.rng,
-            input=self.layer2.output,
-            image_shape=(self.batch_size, nkerns[2], 15, 15),
-            filter_shape=(nkerns[3], nkerns[2], 5, 5),
-            poolsize=(1, 1))
-    
-        self.layer4 = LeNetConvPoolLayer(
-            self.rng,
-            input=self.layer3.output,
-            image_shape=(self.batch_size, nkerns[3], 15, 15),
-            filter_shape=(nkerns[4], nkerns[3], 5, 5),
-            poolsize=(1, 1))
+        layer3_input = self.layer2.output.flatten(2)
 
-        # The final layer doesn't go through a rectifier,
-        # instead, it goes directly into a softmax
-        self.layer5 = LeNetConvPoolLayer(
+        self.layer3 = HiddenLayer(
             self.rng,
-            input=self.layer4.output,
-            image_shape=(self.batch_size, nkerns[4], 15, 15),
-            filter_shape=(1, nkerns[4], 1, 1),
-            poolsize=(1, 1),
-            activate=None)
-
-        self.final_output = T.nnet.softmax(self.layer5.output.flatten(2))
+            input=layer3_input,
+            n_in=nkerns[2]*15*15,
+            n_out=128,
+            activation=T.nnet.relu)
+        
+        self.layer4 = LinearNetwork(
+            self.layer3.output,
+            128)
+        
+        self.final_output = self.layer4.output
 
         # add up all the parameters
-        self.params = (self.layer5.params + self.layer4.params
+        self.params = (self.layer4.params
                        + self.layer3.params + self.layer2.params
                        + self.layer1.params + self.layer0.params)
 
@@ -111,9 +100,8 @@ class ConvNetwork:
         n_valid_batches //= self.batch_size
         n_test_batches //= self.batch_size
 
-        cost = -T.mean(T.log(
-                self.final_output[T.arange(self.y.shape[0]), self.y]))
-        error = T.mean(T.neq(T.argmax(self.final_output, axis=1), self.y))
+        cost = T.mean((self.final_output-self.y) ** 2)
+        error = cost
 
         # find all the parameters and update them using gradient descent
         params = self.params
@@ -191,9 +179,9 @@ class ConvNetwork:
                     validation_losses = [validate_model(i) for i
                                          in range(n_valid_batches)]
                     this_validation_loss = numpy.mean(validation_losses)
-                    print('epoch {}, minibatch {}/{}, validation error {}%'.format(
+                    print('epoch {}, minibatch {}/{}, validation MSE {}'.format(
                             epoch, minibatch_index + 1, n_train_batches,
-                            this_validation_loss * 100.))
+                            this_validation_loss))
                     with open('model_{}.mod'.format(iter), 'wb') as f:
                         pickle.dump(self.dump(), f)
                     # if we got the best validation score until now
@@ -214,9 +202,9 @@ class ConvNetwork:
                     ]
                     test_score = numpy.mean(test_losses)
                     print(('     epoch {}, minibatch {}/{}, test error of '
-                           'best model {}%').format(
+                           'best model MSE {}').format(
                             epoch, minibatch_index + 1, n_train_batches,
-                            test_score * 100.))
+                            test_score))
                     with open('test_{}.res'.format(iter), 'w') as f:
                         print(network.predict(test_set_x), file=f)
 
@@ -265,7 +253,7 @@ if __name__ == '__main__':
         params = pickle.load(open(filename, 'rb'))
         network.load(params)
         print('using {} as a start'.format(filename))
-    datasets = ol_move_data('../data/games.xml')
+    datasets = ol_win_data('../data/games.xml')
     network.train(datasets[0], datasets[1], datasets[2], n_epochs=5)
 #     with open('trained.mod', 'rb') as savefile:
 #         network.load(pickle.load(savefile))

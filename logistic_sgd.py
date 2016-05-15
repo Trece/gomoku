@@ -48,6 +48,22 @@ import numpy
 import theano
 import theano.tensor as T
 
+class LinearNetwork:
+    def __init__(self, input, n_in, activate=T.tanh):
+        self.W = theano.shared(
+            value=numpy.zeros(
+                n_in,
+                dtype=theano.config.floatX),
+            name='W',
+            borrow=True)
+        b = 0.
+        self.b = theano.shared(
+            b,
+            name='b',
+            borrow=True)
+        self.output = activate(T.dot(input, self.W) + self.b)
+        self.input = input
+        self.params = [self.W, self.b]
 
 class LogisticRegression(object):
     """Multi-class Logistic Regression Class

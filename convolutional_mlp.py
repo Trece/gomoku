@@ -39,7 +39,9 @@ from mlp import HiddenLayer
 class LeNetConvPoolLayer:
     """Pool Layer of a convolutional network """
 
-    def __init__(self, rng, input, filter_shape, image_shape, poolsize=(2, 2), activate=T.nnet.relu):
+    def __init__(self, rng, input, filter_shape, image_shape, 
+                 poolsize=(2, 2), activate=T.nnet.relu,
+                 border_mode='half'):
         """
         Allocate a LeNetConvPoolLayer with shared variable internal parameters.
 
@@ -91,16 +93,21 @@ class LeNetConvPoolLayer:
             input=input,
             filters=self.W,
             filter_shape=filter_shape,
-            border_mode='half',
+            border_mode=border_mode,
             input_shape=image_shape
         )
 
         # downsample each feature map individually, using maxpooling
-        # pooled_out = downsample.max_pool_2d(
-#             input=conv_out,
-#             ds=poolsize,
-#             ignore_border=True
-#             )
+#         poolsize = None
+#         if poolsize == (1, 1):
+#             pooled_out = conv_out
+#         else:
+#             pooled_out = downsample.max_pool_2d(
+#                 input=conv_out,
+#                 ds=poolsize,
+#                 ignore_border=True
+#                 )
+        
         pooled_out = conv_out
 
         # add the bias term. Since the bias is a vector (1D array), we first

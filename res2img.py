@@ -67,6 +67,19 @@ def board_data(filename):
         data = pickle.load(f)
         return np.array(data[0]), np.array(data[1])
 
+def board_image(board):
+    board_img = BoardImg()
+    x = board.reshape((2, 15, 15))
+    for i in range(15):
+        for j in range(15):
+            if x[0, i, j] == 1:
+                board_img.acmove((i, j), BoardImg.black)
+    for i in range(15):
+        for j in range(15):
+            if x[1, i, j] == 1:
+                board_img.acmove((i, j), BoardImg.white)
+    return board_img
+
 if __name__ == '__main__':
     all_p = read_data('test_4999.res')
     data_x, data_y = board_data('test_case.pkl')
@@ -76,14 +89,7 @@ if __name__ == '__main__':
         y = data_y[n]
         x = x.reshape((2, 15, 15))
         print(x.shape)
-        for i in range(15):
-            for j in range(15):
-                if x[0, i, j] == 1:
-                    board_img.acmove((i, j), BoardImg.black)
-        for i in range(15):
-            for j in range(15):
-                if x[1, i, j] == 1:
-                    board_img.acmove((i, j), BoardImg.white)
+        board_img = board_image(x)
         board_img.acmove((y//15, y%15), BoardImg.green)
         p = all_p[225*n:225*(n+1)]
         p *= 10
