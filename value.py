@@ -19,7 +19,7 @@ from convolutional_mlp import LeNetConvPoolLayer
 numpy.set_printoptions(threshold=numpy.nan)
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 1], batch_size=1):
+    def __init__(self, nkerns=[100, 100, 1], batch_size=20):
         '''
         nkerns: an array representing how many filters each layer has
         batch_size: a integer indicates batch size
@@ -168,10 +168,10 @@ class ConvNetwork:
                 
                 iter = (epoch - 1) * n_train_batches + minibatch_index
             
+                cost_ij = train_model(minibatch_index)
                 if iter % 100 == 0:
                     print('training @ iter = ', iter, flush=True)
-                cost_ij = train_model(minibatch_index)
-
+                    print('cost = ', cost_ij.mean(), flush=True)
                 if (iter + 1) % validation_frequency == 0:
 
                     # compute zero-one loss on validation set
