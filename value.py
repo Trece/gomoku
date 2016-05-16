@@ -68,22 +68,21 @@ class ConvNetwork:
 
         layer3_input = self.layer2.output.flatten(2)
 
-        self.layer3 = HiddenLayer(
-            self.rng,
-            input=layer3_input,
-            n_in=nkerns[2]*15*15,
-            n_out=128,
-            activation=T.nnet.relu)
+#         self.layer3 = HiddenLayer(
+#             self.rng,
+#             input=layer3_input,
+#             n_in=nkerns[2]*15*15,
+#             n_out=128,
+#             activation=T.nnet.relu)
         
-        self.layer4 = LinearNetwork(
-            self.layer3.output,
+        self.layer3 = LinearNetwork(
+            self.layer3_input,
             128)
         
-        self.final_output = self.layer4.output
+        self.final_output = self.layer3.output
 
         # add up all the parameters
-        self.params = (self.layer4.params
-                       + self.layer3.params + self.layer2.params
+        self.params = (self.layer3.params + self.layer2.params
                        + self.layer1.params + self.layer0.params)
 
     def train(self, train_sets, valid_sets, test_sets, 
@@ -236,7 +235,7 @@ class ConvNetwork:
                 x: set_x[index * batch_size: (index + 1) * batch_size],
                 }
             )
-        pred_list = numpy.array([p for i in range(n_batches) for p in pred(i)])
+        pred_list = numpy.array([pred(i) for i in range(n_batches)])
         return pred_list
 
     def dump(self):
