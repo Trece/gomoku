@@ -77,7 +77,7 @@ class ConvNetwork:
         
         self.layer3 = LinearNetwork(
             layer3_input,
-            128)
+            nkerns[2]*15*15)
         
         self.final_output = self.layer3.output
 
