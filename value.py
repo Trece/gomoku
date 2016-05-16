@@ -19,7 +19,7 @@ from convolutional_mlp import LeNetConvPoolLayer
 numpy.set_printoptions(threshold=numpy.nan)
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 1], batch_size=20):
+    def __init__(self, nkerns=[100, 100, 1], batch_size=1):
         '''
         nkerns: an array representing how many filters each layer has
         batch_size: a integer indicates batch size
@@ -210,9 +210,9 @@ class ConvNetwork:
             
         end_time = timeit.default_timer()
         print('Optimization complete.')
-        print('Best validation score of %f %% obtained at iteration %i, '
-              'with test performance %f %%' %
-              (best_validation_loss * 100., best_iter + 1, test_score * 100.))
+        print('Best validation MSE %f obtained at iteration %i, '
+              'with test MSE %f' %
+              (best_validation_loss, best_iter + 1, test_score))
         print(('The code for file ' +
                os.path.split(__file__)[1] +
                ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
