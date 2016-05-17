@@ -160,8 +160,8 @@ def ol_move_data(filename):
         root = root[:N]
     data = []
 
-    n_validate = 10000
-    n_test = 400
+    n_validate = 5000
+    n_test = 500
     
     # train set with symmetry
     for i, game in enumerate(root[:-n_validate-n_test]):
@@ -175,13 +175,23 @@ def ol_move_data(filename):
             print('no{}'.format(i))
     shuffle(data)
     print(len(data))
+    v_data = []
     # test set with no symmetry
-    for i, game in enumerate(root[-n_validate-n_test:]):
+    for i, game in enumerate(root[-n_validate-n_test:-n_test]):
         board_string = game.find('board').text
         if not board_string or'--' in board_string:
             pass
         else:
-            data.append(game2img(board_string))
+            t_data.append(game2img(board_string))
+        if i % 50 == 0:
+            print('no{}'.format(i))
+
+    for i, game in enumerate(root[-n_test:]):
+        board_string = game.find('board').text
+        if not board_string or'--' in board_string:
+            pass
+        else:
+            t_data.append(game2img(board_string))
         if i % 50 == 0:
             print('no{}'.format(i))
 
@@ -190,19 +200,22 @@ def ol_move_data(filename):
     n_train = len(data) - n_validate - n_test
     data_x = [x.reshape(2*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
-
+    v_data_x = [x.reshape(2*15*15) for d in v_data for x in d[0]]
+    v_data_y = [y[0]*15 + y[1] for d in v_data for y in d[1]]
+    t_data_x = [x.reshape(2*15*15) for d in t_data for x in d[0]]
+    t_data_y = [y[0]*15 + y[1] for d in t_data for y in d[1]]
     print('total train moves: {}'.format(n_train))
     with open('test_results', 'w') as f:
-        print(data_y[-n_test:], file=f)
-    test_xy = (data_x[-n_test:], data_y[-n_test:])
+        print(t_data_y, file=f)
+    test_xy = (t_data_x, data_y)
     with open('test_case.pkl', 'wb') as f:
         pickle.dump(test_xy, f)
-    train_x, train_y = shared_dataset((data_x[:n_train],
-                                       data_y[:n_train]))
-    validate_x, validate_y = shared_dataset((data_x[n_train:n_train + n_validate],
-                                             data_y[n_train:n_train + n_validate]))
-    test_x, test_y = shared_dataset((data_x[-n_test:],
-                                     data_y[-n_test:]))
+    train_x, train_y = shared_dataset((data_x,
+                                       data_y))
+    validate_x, validate_y = shared_dataset((v_data_x,
+                                             v_data_y))
+    test_x, test_y = shared_dataset((t_data_x,
+                                     t_data_y))
     rval = [(train_x, train_y), (validate_x, validate_y), (test_x, test_y)]
     print(train_x.get_value(borrow=True).shape)
     return rval
