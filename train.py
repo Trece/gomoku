@@ -186,6 +186,7 @@ def ol_move_data(filename):
         if i % 50 == 0:
             print('no{}'.format(i))
 
+    t_data = []
     for i, game in enumerate(root[-n_test:]):
         board_string = game.find('board').text
         if not board_string or'--' in board_string:
