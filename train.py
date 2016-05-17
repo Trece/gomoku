@@ -175,6 +175,7 @@ def ol_move_data(filename):
         if i % 50 == 0:
             print('no{}'.format(i))
     shuffle(data)
+    print(len(data))
     # test set with no symmetry
     for i, game in enumerate(root[-n_validate-n_test:]):
         board_string = game.find('board').text
@@ -257,7 +258,8 @@ def ol_win_data(filename):
 
 if __name__ == '__main__':
     numpy.set_printoptions(threshold=numpy.nan)
-    print(ol_win_data('../data/games.xml'))
+#     print(ol_win_data('../data/games.xml'))
+    ol_move_data('../data/games.xml')
 #     a = numpy.zeros(15*15).reshape((15, 15))
 #     a[[4, 5, 6]] = 1
 #     b = []
