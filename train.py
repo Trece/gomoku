@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 from copy import deepcopy
 from pprint import pprint
-from random import randrange
+from random import randrange, shuffle
 
 import pickle
 
@@ -13,9 +13,22 @@ import theano.tensor as T
 DEBUG = True
 OPENING_N = 3
 
-def moveindex(move):
+def moveindex(move, direction=0):
+    d = [(0, 0), (0, 1), (0, 2), (0, 3),
+         (1, 0), (1, 1), (1, 2), (1, 3)]
     row = ord(move[0]) - ord('a')
     col = int(move[1:]) - 1
+    flip, rot = d[direction]
+    if flip:
+        row = 14 - row
+        col = 14 - col
+    m, n = row - 7, col - 7
+    for i in range(rot):
+        m, n = -n, m
+    row, col = m + 7, n + 7
+    if row < 0 or row > 14 or col < 0 or col > 14:
+        print('move is {}, direction {} {}, m n {} {}, row col {} {}'.format(
+                move, flip, rot, m, n, row, col))
     return row, col
 
 class Board:
@@ -55,13 +68,13 @@ def check_n(board, pos, n):
     return False
 
 
-def game2img(game):
+def game2img(game, direction=0):
     '''
     input: a string that records the game, moves separated by spaces
     output: an array of matrices that represents the features, 
             and the array of actual next moves
     '''
-    moves = [moveindex(move) for move in game.split()]
+    moves = [moveindex(move, direction) for move in game.split()]
     turn = 0
     board_black = numpy.zeros((15, 15), dtype='int32')
     board_white = numpy.zeros((15, 15), dtype='int32')
@@ -87,12 +100,12 @@ def game2img(game):
 
     return numpy.array(b_data), m_data
 
-def game_pos(game):
+def game_pos(game, direction=0):
     '''
     input: a string that records the game, moves separated by spaces
     output: a random situation during the game
     '''
-    moves = [moveindex(move) for move in game.split()]
+    moves = [moveindex(move, direction) for move in game.split()]
     board_black = numpy.zeros((15, 15), dtype='int32')
     board_white = numpy.zeros((15, 15), dtype='int32')
     board = [board_black, board_white]
@@ -142,10 +155,28 @@ def ol_move_data(filename):
     '''
     tree = ET.parse(filename)
     root = tree.getroot()
+    N = 50000
     if DEBUG:
-        root = root[:50000]
+        root = root[:N]
     data = []
-    for i, game in enumerate(root):
+
+    n_validate = 10000
+    n_test = 400
+    n_train = (N - n_validate - n_test) * 8
+    
+    # train set with symmetry
+    for i, game in enumerate(root[:-n_validate-n_test]):
+        board_string = game.find('board').text
+        if not board_string or'--' in board_string:
+            pass
+        else:
+            for direction in range(8):
+                data.append(game2img(board_string, direction=direction))
+        if i % 50 == 0:
+            print('no{}'.format(i))
+    shuffle(data)
+    # test set with no symmetry
+    for i, game in enumerate(root[-n_validate-n_test:]):
         board_string = game.find('board').text
         if not board_string or'--' in board_string:
             pass
@@ -153,31 +184,26 @@ def ol_move_data(filename):
             data.append(game2img(board_string))
         if i % 50 == 0:
             print('no{}'.format(i))
+
     print("total data: {}".format(len(data)))
     # print(data)
     data_x = [x.reshape(2*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
 
-
-    n_validate = 10000
-    n_test = 400
-    n_train = len(data_x) - n_validate - n_test
-    n_validate = n_train + n_validate
-    n_test = n_validate + n_test
-    
-    print('total train data: {}'.format(n_train))
+    print('total train moves: {}'.format(n_train))
     with open('test_results', 'w') as f:
-        print(data_y[n_validate:n_test], file=f)
-    test_xy = (data_x[n_validate:n_test], data_y[n_validate:n_test])
+        print(data_y[-n_test:], file=f)
+    test_xy = (data_x[-n_test:], data_y[-n_test:])
     with open('test_case.pkl', 'wb') as f:
         pickle.dump(test_xy, f)
     train_x, train_y = shared_dataset((data_x[:n_train],
                                        data_y[:n_train]))
-    validate_x, validate_y = shared_dataset((data_x[n_train:n_validate],
-                                             data_y[n_train:n_validate]))
-    test_x, test_y = shared_dataset((data_x[n_validate:n_test],
-                                     data_y[n_validate:n_test]))
+    validate_x, validate_y = shared_dataset((data_x[n_train:n_train + n_validate],
+                                             data_y[n_train:n_train + n_validate]))
+    test_x, test_y = shared_dataset((data_x[-n_test:],
+                                     data_y[-n_test:]))
     rval = [(train_x, train_y), (validate_x, validate_y), (test_x, test_y)]
+    print(train_x.get_value(borrow=True).shape)
     return rval
 
 def ol_win_data(filename):
