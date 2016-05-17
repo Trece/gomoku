@@ -182,7 +182,7 @@ def ol_move_data(filename):
         if not board_string or'--' in board_string:
             pass
         else:
-            t_data.append(game2img(board_string))
+            v_data.append(game2img(board_string))
         if i % 50 == 0:
             print('no{}'.format(i))
 
