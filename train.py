@@ -162,7 +162,6 @@ def ol_move_data(filename):
 
     n_validate = 10000
     n_test = 400
-    n_train = (N - n_validate - n_test) * 8
     
     # train set with symmetry
     for i, game in enumerate(root[:-n_validate-n_test]):
@@ -188,6 +187,7 @@ def ol_move_data(filename):
 
     print("total data: {}".format(len(data)))
     # print(data)
+    n_train = len(data) - n_validate - n_test
     data_x = [x.reshape(2*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
 
