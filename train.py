@@ -199,8 +199,13 @@ def ol_move_data(filename):
     print("total data: {}".format(len(data)))
     # print(data)
     n_train = len(data) - n_validate - n_test
+
+    MAX = 500000
     data_x = [x.reshape(2*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
+    length = (len(data_x)-1)//MAX
+    data_x = [data_x[i*MAX:(i+1)*MAX] for i in range(length)]
+    data_y = [data_y[i*MAX:(i+1)*MAX] for i in range(length)]
     v_data_x = [x.reshape(2*15*15) for d in v_data for x in d[0]]
     v_data_y = [y[0]*15 + y[1] for d in v_data for y in d[1]]
     t_data_x = [x.reshape(2*15*15) for d in t_data for x in d[0]]
@@ -208,17 +213,16 @@ def ol_move_data(filename):
     print('total train moves: {}'.format(n_train))
     with open('test_results', 'w') as f:
         print(t_data_y, file=f)
-    test_xy = (t_data_x, data_y)
+    test_xy = (t_data_x, t_data_y)
     with open('test_case.pkl', 'wb') as f:
         pickle.dump(test_xy, f)
-    train_x, train_y = shared_dataset((data_x,
-                                       data_y))
+    train_xy = [shared_dataset((x,y)) 
+                for x, y in zip(data_x, data_y)]
     validate_x, validate_y = shared_dataset((v_data_x,
                                              v_data_y))
     test_x, test_y = shared_dataset((t_data_x,
                                      t_data_y))
-    rval = [(train_x, train_y), (validate_x, validate_y), (test_x, test_y)]
-    print(train_x.get_value(borrow=True).shape)
+    rval = [train_xy, (validate_x, validate_y), (test_x, test_y)]
     return rval
 
 def ol_win_data(filename):
@@ -229,7 +233,7 @@ def ol_win_data(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     if DEBUG:
-        root = root[:50000]
+        root = root[:500]
     data = []
     for i, game in enumerate(root):
         if i % 50 == 0:

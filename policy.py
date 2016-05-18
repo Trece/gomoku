@@ -266,7 +266,9 @@ if __name__ == '__main__':
         network.load(params)
         print('using {} as a start'.format(filename))
     datasets = ol_move_data('../data/games.xml')
-    network.train(datasets[0], datasets[1], datasets[2], n_epochs=1)
+    train_sets, valid_set, test_set = datasets
+    for train_set in train_sets:
+        network.train(train_set, valid_set, test_set, n_epochs=1)
 #     with open('trained.mod', 'rb') as savefile:
 #         network.load(pickle.load(savefile))
 #     p = network.predict(datasets[2][0])
