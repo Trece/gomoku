@@ -10,10 +10,10 @@ import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.nnet import conv2d
 
-from logistic_sgd import load_data
-from train import ol_move_data, shared_dataset
-from mlp import HiddenLayer
-from convolutional_mlp import LeNetConvPoolLayer
+from .logistic_sgd import load_data
+from .train import ol_move_data, shared_dataset
+from .mlp import HiddenLayer
+from .convolutional_mlp import LeNetConvPoolLayer
 
 # For debugging convenience set to print all numbers in the numpy array
 numpy.set_printoptions(threshold=numpy.nan)
@@ -257,6 +257,13 @@ class ConvNetwork:
     def load(self, values):
         for p, value in zip(self.params, values):
             p.set_value(value)
+
+    def load_file(self, filename='cur.mod'):
+        directory = __file__.split('/')[:-1]
+        directory.append(filename)
+        modfile = '/'.join(directory)
+        print(modfile)
+        self.load(pickle.load(open(modfile, 'rb')))
 
 if __name__ == '__main__':
     network = ConvNetwork()
