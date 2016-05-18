@@ -94,6 +94,7 @@ class Board:
             self.moveto(x, y)
         else:
             print('suggest: {} {}'.format(x, y))
+            return x, y
 
 if __name__ == '__main__':
     instr = ''

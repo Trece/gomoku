@@ -11,7 +11,7 @@ from theano.tensor.signal import downsample
 from theano.tensor.nnet import conv2d
 
 from logistic_sgd import load_data
-from train import ol_move_data
+from train import ol_move_data, shared_dataset
 from mlp import HiddenLayer
 from convolutional_mlp import LeNetConvPoolLayer
 
@@ -267,8 +267,8 @@ if __name__ == '__main__':
         print('using {} as a start'.format(filename))
     datasets = ol_move_data('../data/games.xml')
     train_sets, valid_set, test_set = datasets
-    for train_set in train_sets:
-        network.train(train_set, valid_set, test_set, n_epochs=1)
+    for x, y in zip(train_sets[0], train_sets[1]):
+        network.train(shared_dataset((x, y)), valid_set, test_set, n_epochs=1)
 #     with open('trained.mod', 'rb') as savefile:
 #         network.load(pickle.load(savefile))
 #     p = network.predict(datasets[2][0])

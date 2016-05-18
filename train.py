@@ -216,13 +216,11 @@ def ol_move_data(filename):
     test_xy = (t_data_x, t_data_y)
     with open('test_case.pkl', 'wb') as f:
         pickle.dump(test_xy, f)
-    train_xy = [shared_dataset((x,y)) 
-                for x, y in zip(data_x, data_y)]
     validate_x, validate_y = shared_dataset((v_data_x,
                                              v_data_y))
     test_x, test_y = shared_dataset((t_data_x,
                                      t_data_y))
-    rval = [train_xy, (validate_x, validate_y), (test_x, test_y)]
+    rval = [(data_x, data_y), (validate_x, validate_y), (test_x, test_y)]
     return rval
 
 def ol_win_data(filename):
