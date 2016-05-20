@@ -71,8 +71,8 @@ class ConvNetwork:
             input=self.layer2.output,
             image_shape=(self.batch_size, nkerns[2], 15, 15),
             filter_shape=(nkerns[3], nkerns[2], 5, 5),
-            poolsize=(1, 1))
-
+            poolsize=(1, 1),
+            activate=None)
 
         layer4_input = self.layer3.output.flatten(2)
 
