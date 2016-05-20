@@ -75,14 +75,14 @@ class ConvNetwork:
             n_out=128,
             activation=T.nnet.relu)
         
-        self.layer3 = LinearNetwork(
+        self.layer4 = LinearNetwork(
             layer3_input,
             128)
         
-        self.final_output = self.layer3.output
+        self.final_output = self.layer4.output
 
         # add up all the parameters
-        self.params = (self.layer3.params + self.layer2.params
+        self.params = (self.layer4.params + self.layer3.params + self.layer2.params
                        + self.layer1.params + self.layer0.params)
 
     def train(self, train_sets, valid_sets, test_sets, 
