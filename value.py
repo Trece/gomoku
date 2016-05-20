@@ -148,7 +148,6 @@ class ConvNetwork:
             self.y,
             givens={y: train_set_y[index * batch_size: (index + 1) * batch_size]}
             )
-            
 
         print('... training')
         # early-stopping parameters
@@ -179,8 +178,9 @@ class ConvNetwork:
                 if iter % 100 == 0:
                     print('training @ iter = ', iter)
                     print('cost = ', cost_ij.mean())
-                    print('actual result is {}'.format(game_result(minibatch_index)),
-                          flush=True)
+                    print('actual result is {}'.format(game_result(minibatch_index)))
+                    print('W is {}'.format(self.layer3.W))
+                    print('', flush=True)
                 if (iter + 1) % validation_frequency == 0:
 
                     # compute zero-one loss on validation set
