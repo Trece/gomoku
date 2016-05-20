@@ -95,7 +95,7 @@ class ConvNetwork:
                        + self.layer1.params + self.layer0.params)
 
     def train(self, train_sets, valid_sets, test_sets, 
-              n_epochs=200, learning_rate=0.1):
+              n_epochs=200, learning_rate=0.5):
 
         train_set_x, train_set_y = train_sets
         valid_set_x, valid_set_y = valid_sets
