@@ -19,7 +19,7 @@ from convolutional_mlp import LeNetConvPoolLayer
 numpy.set_printoptions(threshold=numpy.nan)
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 100, 1], batch_size=1):
+    def __init__(self, nkerns=[100, 100, 100, 1], batch_size=10):
         '''
         nkerns: an array representing how many filters each layer has
         batch_size: a integer indicates batch size
@@ -80,7 +80,8 @@ class ConvNetwork:
             self.rng,
             input=layer4_input,
             n_in=nkerns[3]*15*15,
-            n_out=128)
+            n_out=128,
+            activation=T.nnet.relu)
         
         self.layer5 = LinearNetwork(
             self.layer4.output,
@@ -94,7 +95,7 @@ class ConvNetwork:
                        + self.layer1.params + self.layer0.params)
 
     def train(self, train_sets, valid_sets, test_sets, 
-              n_epochs=200, learning_rate=0.5):
+              n_epochs=200, learning_rate=0.1):
 
         train_set_x, train_set_y = train_sets
         valid_set_x, valid_set_y = valid_sets
@@ -191,7 +192,7 @@ class ConvNetwork:
         while (epoch < n_epochs):
             epoch = epoch + 1
             training_loss = []
-            for minibatch_index in range(100):
+            for minibatch_index in range(n_train_batches):
                 
                 iter = (epoch - 1) * n_train_batches + minibatch_index
                 
