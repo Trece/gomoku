@@ -68,16 +68,16 @@ class ConvNetwork:
 
         layer3_input = self.layer2.output.flatten(2)
 
-#         self.layer3 = HiddenLayer(
-#             self.rng,
-#             input=layer3_input,
-#             n_in=nkerns[2]*15*15,
-#             n_out=128,
-#             activation=T.nnet.relu)
+        self.layer3 = HiddenLayer(
+            self.rng,
+            input=layer3_input,
+            n_in=nkerns[2]*15*15,
+            n_out=128,
+            activation=T.nnet.relu)
         
         self.layer3 = LinearNetwork(
             layer3_input,
-            nkerns[2]*15*15)
+            128)
         
         self.final_output = self.layer3.output
 
