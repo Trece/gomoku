@@ -68,7 +68,7 @@ class ConvNetwork:
 
         self.layer3 = LeNetConvPoolLayer(
             self.rng,
-            input=self.layer1.output,
+            input=self.layer2.output,
             image_shape=(self.batch_size, nkerns[2], 15, 15),
             filter_shape=(nkerns[3], nkerns[2], 5, 5),
             poolsize=(1, 1))
