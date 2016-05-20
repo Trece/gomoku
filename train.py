@@ -257,6 +257,7 @@ def ol_win_data(filename):
             continue
         for direction in range(8):
             data.append(game_pos(board_string, winside, direction))
+            data.append(game_pos(board_string, winside, direction))
     print("total data: {}".format(len(data)))
     shuffle(data)
     data_x = [d[0].reshape(2*15*15) for d in data]
