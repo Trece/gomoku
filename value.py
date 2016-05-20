@@ -80,8 +80,7 @@ class ConvNetwork:
             self.rng,
             input=layer4_input,
             n_in=nkerns[3]*15*15,
-            n_out=128,
-            activation=T.nnet.relu)
+            n_out=128,)
         
         self.layer5 = LinearNetwork(
             self.layer4.output,
