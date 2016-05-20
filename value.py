@@ -78,7 +78,7 @@ class ConvNetwork:
 
         self.layer4 = HiddenLayer(
             self.rng,
-            input=layer3_input,
+            input=layer4_input,
             n_in=nkerns[3]*15*15,
             n_out=128,
             activation=T.nnet.relu)
