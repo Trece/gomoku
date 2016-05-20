@@ -143,6 +143,13 @@ class ConvNetwork:
                 }
             )
         
+        game_result = theano.function{
+            [index],
+            self.y,
+            givens={y: train_set_y[index * batch_size: (index + 1) * batch_size]}
+            }
+            
+
         print('... training')
         # early-stopping parameters
         patience = 10000  # look as this many examples regardless
@@ -170,8 +177,9 @@ class ConvNetwork:
             
                 cost_ij = train_model(minibatch_index)
                 if iter % 100 == 0:
-                    print('training @ iter = ', iter, flush=True)
-                    print('cost = ', cost_ij.mean(), flush=True)
+                    print('training @ iter = ', iter)
+                    print('cost = ', cost_ij.mean())
+                    print('actual result is {}'.format(game_result()), flush=True)
                 if (iter + 1) % validation_frequency == 0:
 
                     # compute zero-one loss on validation set
