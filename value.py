@@ -195,6 +195,7 @@ class ConvNetwork:
                 if iter % 100 == 0:
                     print('training @ iter = ', iter)
                     print('cost = {}'.format(cost_ij))
+                    print('b = {}'.format(self.layer5.b.get_value()))
                     print('actual result is {}'.format(game_result(minibatch_index)))
                     print('prediction is {}'.format(prediction(minibatch_index)))
                     print('', flush=True)
