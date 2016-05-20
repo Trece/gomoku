@@ -191,13 +191,13 @@ class ConvNetwork:
         while (epoch < n_epochs):
             epoch = epoch + 1
             training_loss = []
-            for minibatch_index in range(n_train_batches):
+            for minibatch_index in range(100):
                 
                 iter = (epoch - 1) * n_train_batches + minibatch_index
                 
                 cost_ij = train_model(minibatch_index)
                 training_loss.append(cost_ij)
-                if iter % 100 == 0:
+                if iter % 1 == 0:
                     print('training @ iter = ', iter)
                     print('cost = {}'.format(cost_ij))
                     print('y = {}'.format(actual_result(minibatch_index)))
