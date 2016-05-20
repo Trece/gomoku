@@ -143,11 +143,11 @@ class ConvNetwork:
                 }
             )
         
-        game_result = theano.function{
+        game_result = theano.function(
             [index],
             self.y,
             givens={y: train_set_y[index * batch_size: (index + 1) * batch_size]}
-            }
+            )
             
 
         print('... training')
