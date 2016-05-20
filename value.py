@@ -80,7 +80,7 @@ class ConvNetwork:
             self.rng,
             input=layer4_input,
             n_in=nkerns[3]*15*15,
-            n_out=128,)
+            n_out=128)
         
         self.layer5 = LinearNetwork(
             self.layer4.output,
@@ -151,9 +151,9 @@ class ConvNetwork:
                 }
             )
         
-        layer4_output = theano.function(
+        layer4_input = theano.function(
             [index],
-            self.layer4.output,
+            self.layer4.input,
             givens={
                 x:train_set_x[index * batch_size: (index + 1) * batch_size]
                 }
