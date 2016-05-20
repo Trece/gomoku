@@ -152,16 +152,12 @@ class ConvNetwork:
                 }
             )
         
-        game_result = theano.function(
+        layer4_output = theano.function(
             [index],
-            self.y,
-            givens={y: train_set_y[index * batch_size: (index + 1) * batch_size]}
-            )
-
-        prediction = theano.function(
-            [index],
-            self.final_output,
-            givens={x: train_set_x[index * batch_size: (index + 1) * batch_size]}
+            self.layer4.output,
+            givens={
+                x:train_set_x[index * batch_size: (index + 1) * batch_size]
+                }
             )
 
         print('... training')
@@ -195,7 +191,7 @@ class ConvNetwork:
                 if iter % 100 == 0:
                     print('training @ iter = ', iter)
                     print('cost = {}'.format(cost_ij))
-                    print('b = {}'.format(self.layer5.b.get_value()))
+                    print('b = {}'.format(self.layer4_output()))
                     print('actual result is {}'.format(game_result(minibatch_index)))
                     print('prediction is {}'.format(prediction(minibatch_index)))
                     print('', flush=True)
