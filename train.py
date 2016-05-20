@@ -274,8 +274,8 @@ def ol_win_data(filename):
         if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
             continue
         v_data.append(game_pos(board_string, winside))
-    v_data_x = [d[0].reshape(2*15*15) for d in data]
-    v_data_y = [d[1] for d in data]
+    v_data_x = [d[0].reshape(2*15*15) for d in v_data]
+    v_data_y = [d[1] for d in v_data]
 
     t_data = []
     for i, game in enumerate(root[-n_test:]):
@@ -289,8 +289,8 @@ def ol_win_data(filename):
         if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
             continue
         t_data.append(game_pos(board_string, winside))
-    t_data_x = [d[0].reshape(2*15*15) for d in data]
-    t_data_y = [d[1] for d in data]
+    t_data_x = [d[0].reshape(2*15*15) for d in t_data]
+    t_data_y = [d[1] for d in t_data]
     
     n_train = n_train * 8
 
