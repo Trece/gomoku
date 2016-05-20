@@ -238,9 +238,9 @@ def ol_win_data(filename):
     '''
     tree = ET.parse(filename)
     root = tree.getroot()
-    N = 500
-    n_validate = 100
-    n_test = 100
+    N = 50000
+    n_validate = 5000
+    n_test = 1000
     n_train = N - n_validate - n_test
     if DEBUG:
         root = root[:N]
