@@ -153,7 +153,7 @@ class ConvNetwork:
         
         layer3_output = theano.function(
             [index],
-            self.layer3.input,
+            self.layer3.W,
             givens={
                 x:train_set_x[index * batch_size: (index + 1) * batch_size]
                 }
