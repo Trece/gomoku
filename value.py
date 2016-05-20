@@ -179,7 +179,6 @@ class ConvNetwork:
                     print('training @ iter = ', iter)
                     print('cost = ', cost_ij.mean())
                     print('actual result is {}'.format(game_result(minibatch_index)))
-                    print('W is {}'.format(self.layer3.W.get_value()))
                     print('', flush=True)
                 if (iter + 1) % validation_frequency == 0:
 
