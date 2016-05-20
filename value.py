@@ -199,7 +199,7 @@ class ConvNetwork:
                 if iter % 100 == 0:
                     print('training @ iter = ', iter)
                     print('cost = {}'.format(cost_ij))
-                    print('b = {}'.format(layer3_output(minibatch_index).sum()))
+                    print('b = {}'.format(network.layer3.W.get_value().sum()))
                     print('prediction is {}'.format(prediction(minibatch_index)))
                     print('', flush=True)
                 if (iter + 1) % validation_frequency == 0:
