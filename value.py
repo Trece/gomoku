@@ -90,7 +90,8 @@ class ConvNetwork:
         self.final_output = self.layer5.output
 
         # add up all the parameters
-        self.params = (self.layer4.params + self.layer3.params + self.layer2.params
+        self.params = (self.layer5.params + self.layer4.params
+                       + self.layer3.params + self.layer2.params
                        + self.layer1.params + self.layer0.params)
 
     def train(self, train_sets, valid_sets, test_sets, 
