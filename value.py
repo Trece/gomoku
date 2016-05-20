@@ -194,7 +194,7 @@ class ConvNetwork:
                 training_loss.append(cost_ij)
                 if iter % 100 == 0:
                     print('training @ iter = ', iter)
-                    print('cost = ', cost_ij)
+                    print('cost = {}'.format(cost_ij))
                     print('actual result is {}'.format(game_result(minibatch_index)))
                     print('prediction is {}'.format(prediction(minibatch_index)))
                     print('', flush=True)
