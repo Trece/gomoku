@@ -152,7 +152,7 @@ class ConvNetwork:
         prediction = theano.function(
             [index],
             self.final_output,
-            givens={x: trainset_x[index * batch_size: (index + 1) * batch_size]}
+            givens={x: train_set_x[index * batch_size: (index + 1) * batch_size]}
             )
 
         print('... training')
