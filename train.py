@@ -297,7 +297,6 @@ def ol_win_data(filename):
     print('total train data: {}'.format(n_train))
     with open('win_test_results', 'w') as f:
         print(t_data_y, file=f)
-    test_xy = (data_x[n_validate:n_test], data_y[n_validate:n_test])
     with open('win_test_case.pkl', 'wb') as f:
         pickle.dump(t_data, f)
     train_x, train_y = shared_dataset((data_x,
