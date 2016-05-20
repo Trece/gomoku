@@ -76,7 +76,7 @@ class ConvNetwork:
             activation=T.nnet.relu)
         
         self.layer4 = LinearNetwork(
-            layer3_input,
+            self.layer3.output,
             128)
         
         self.final_output = self.layer4.output
