@@ -176,11 +176,13 @@ class ConvNetwork:
 
         while (epoch < n_epochs):
             epoch = epoch + 1
+            training_loss = []
             for minibatch_index in range(n_train_batches):
                 
                 iter = (epoch - 1) * n_train_batches + minibatch_index
-            
+                
                 cost_ij = train_model(minibatch_index)
+                training_loss.append(cost_ij)
                 if iter % 100 == 0:
                     print('training @ iter = ', iter)
                     print('cost = ', cost_ij.mean())
@@ -193,9 +195,11 @@ class ConvNetwork:
                     validation_losses = [validate_model(i) for i
                                          in range(n_valid_batches)]
                     this_validation_loss = numpy.mean(validation_losses)
-                    print('epoch {}, minibatch {}/{}, validation MSE {}'.format(
+                    this_training_loss = numpy.mean(numpy.array(training_loss))
+                    print('epoch {}, minibatch {}/{}, validation MSE {}, training MSE{}'.format(
                             epoch, minibatch_index + 1, n_train_batches,
-                            this_validation_loss))
+                            this_validation_loss, this_training_loss))
+                    training_loss = []
                     with open('model_{}.mod'.format(iter), 'wb') as f:
                         pickle.dump(self.dump(), f)
                     # if we got the best validation score until now
