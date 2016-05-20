@@ -19,7 +19,7 @@ from convolutional_mlp import LeNetConvPoolLayer
 numpy.set_printoptions(threshold=numpy.nan)
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 1], batch_size=1):
+    def __init__(self, nkerns=[100, 100, 100, 1], batch_size=1):
         '''
         nkerns: an array representing how many filters each layer has
         batch_size: a integer indicates batch size
@@ -66,20 +66,28 @@ class ConvNetwork:
             filter_shape=(nkerns[2], nkerns[1], 5, 5),
             poolsize=(1, 1))
 
-        layer3_input = self.layer2.output.flatten(2)
+        self.layer3 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer1.output,
+            image_shape=(self.batch_size, nkerns[2], 15, 15),
+            filter_shape=(nkerns[3], nkerns[2], 5, 5),
+            poolsize=(1, 1))
 
-        self.layer3 = HiddenLayer(
+
+        layer4_input = self.layer3.output.flatten(2)
+
+        self.layer4 = HiddenLayer(
             self.rng,
             input=layer3_input,
-            n_in=nkerns[2]*15*15,
+            n_in=nkerns[3]*15*15,
             n_out=128,
             activation=T.nnet.relu)
         
-        self.layer4 = LinearNetwork(
-            self.layer3.output,
+        self.layer5 = LinearNetwork(
+            self.layer4.output,
             128)
         
-        self.final_output = self.layer4.output
+        self.final_output = self.layer5.output
 
         # add up all the parameters
         self.params = (self.layer4.params + self.layer3.params + self.layer2.params
@@ -185,7 +193,7 @@ class ConvNetwork:
                 training_loss.append(cost_ij)
                 if iter % 100 == 0:
                     print('training @ iter = ', iter)
-                    print('cost = ', cost_ij.mean())
+                    print('cost = ', cost_ij)
                     print('actual result is {}'.format(game_result(minibatch_index)))
                     print('prediction is {}'.format(prediction(minibatch_index)))
                     print('', flush=True)
