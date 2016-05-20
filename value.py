@@ -160,6 +160,14 @@ class ConvNetwork:
                 }
             )
 
+        prediction = theano.function(
+            [index],
+            self.final_output,
+            givens={
+                x:train_set_x[index * batch_size: (index + 1) * batch_size]
+                }
+            )
+
         print('... training')
         # early-stopping parameters
         patience = 10000  # look as this many examples regardless
