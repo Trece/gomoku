@@ -279,6 +279,13 @@ class ConvNetwork:
         for p, value in zip(self.params, values):
             p.set_value(value)
 
+    def load_file(self, filename='cur.mod'):
+        directory = __file__.split('/')[:-1]
+        directory.append(filename)
+        modfile = '/'.join(directory)
+        print(modfile)
+        self.load(pickle.load(open(modefile, 'rb')))
+
 if __name__ == '__main__':
     network = ConvNetwork()
     if len(sys.argv) > 1:
