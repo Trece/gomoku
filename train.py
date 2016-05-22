@@ -100,7 +100,7 @@ def game2img(game, direction=0):
 
     return numpy.array(b_data), m_data
 
-def game_pos(game, direction=0):
+def game_pos(game, winside, direction=0):
     '''
     input: a string that records the game, moves separated by spaces
     output: a random situation during the game
@@ -109,7 +109,6 @@ def game_pos(game, direction=0):
     board_black = numpy.zeros((15, 15), dtype='int32')
     board_white = numpy.zeros((15, 15), dtype='int32')
     board = [board_black, board_white]
-    num = None
     turn = 0
     if len(moves) > OPENING_N:
         num = randrange(OPENING_N, len(moves)) 
@@ -121,7 +120,16 @@ def game_pos(game, direction=0):
             print('error')
         board[turn][i][j] = 1
         turn = 1 - turn
-    return numpy.array(board)
+    if winside == 'black':
+        y = 1
+    elif winside == 'white':
+        y = -1
+    else:
+        y = 0
+    if num % 2 == 1:
+        board = board[1], board[0]
+        y = -y
+    return numpy.array(board), y
 
 def shared_dataset(data_xy, borrow=True):
     """ Function that loads the dataset into shared variables
@@ -230,44 +238,74 @@ def ol_win_data(filename):
     '''
     tree = ET.parse(filename)
     root = tree.getroot()
+    N = 500
+    n_validate = 100
+    n_test = 100
+    n_train = N - n_validate - n_test
     if DEBUG:
-        root = root[:500]
+        root = root[:N]
     data = []
-    for i, game in enumerate(root):
+    for i, game in enumerate(root[:-n_validate-n_test]):
         if i % 50 == 0:
             print('no{}'.format(i))
         board_string = game.find('board').text
         if not board_string or'--' in board_string:
             continue
-        win_side = game.find('winner').text
+        winside = game.find('winner').text
         reason = game.find('winby').text
-        if not reason in ['resign', 'five'] or not win_side in ['black', 'white']:
+        if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
             continue
-        win_side = (1 if win_side == 'black' else -1)
-        data.append((game_pos(board_string), win_side))
+        for direction in range(8):
+            data.append(game_pos(board_string, winside, direction))
     print("total data: {}".format(len(data)))
+    shuffle(data)
     data_x = [d[0].reshape(2*15*15) for d in data]
     data_y = [d[1] for d in data]
-    print(data_y)
 
-    n_validate = 3000
-    n_test = 100
-    n_train = len(data_x) - n_validate - n_test
-    n_validate = n_train + n_validate
-    n_test = n_validate + n_test
+    v_data = []
+    for i, game in enumerate(root[-n_validate-n_test:-n_test]):
+        if i % 50 == 0:
+            print('no{}'.format(i))
+        board_string = game.find('board').text
+        if not board_string or'--' in board_string:
+            continue
+        winside = game.find('winner').text
+        reason = game.find('winby').text
+        if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
+            continue
+        v_data.append(game_pos(board_string, winside))
+    v_data_x = [d[0].reshape(2*15*15) for d in data]
+    v_data_y = [d[1] for d in data]
+
+    t_data = []
+    for i, game in enumerate(root[-n_test:]):
+        if i % 50 == 0:
+            print('no{}'.format(i))
+        board_string = game.find('board').text
+        if not board_string or'--' in board_string:
+            continue
+        winside = game.find('winner').text
+        reason = game.find('winby').text
+        if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
+            continue
+        t_data.append(game_pos(board_string, winside))
+    t_data_x = [d[0].reshape(2*15*15) for d in data]
+    t_data_y = [d[1] for d in data]
     
+    n_train = n_train * 8
+
     print('total train data: {}'.format(n_train))
-    with open('test_results', 'w') as f:
-        print(data_y[n_validate:n_test], file=f)
+    with open('win_test_results', 'w') as f:
+        print(t_data_y, file=f)
     test_xy = (data_x[n_validate:n_test], data_y[n_validate:n_test])
-    with open('test_case.pkl', 'wb') as f:
-        pickle.dump(test_xy, f)
-    train_x, train_y = shared_dataset((data_x[:n_train],
-                                       data_y[:n_train]))
-    validate_x, validate_y = shared_dataset((data_x[n_train:n_validate],
-                                             data_y[n_train:n_validate]))
-    test_x, test_y = shared_dataset((data_x[n_validate:n_test],
-                                     data_y[n_validate:n_test]))
+    with open('win_test_case.pkl', 'wb') as f:
+        pickle.dump(t_data, f)
+    train_x, train_y = shared_dataset((data_x,
+                                       data_y))
+    validate_x, validate_y = shared_dataset((v_data_x,
+                                             v_data_y))
+    test_x, test_y = shared_dataset((t_data_x,
+                                     t_data_y))
     rval = [(train_x, train_y), (validate_x, validate_y), (test_x, test_y)]
     return rval
 
@@ -275,7 +313,7 @@ def ol_win_data(filename):
 if __name__ == '__main__':
     numpy.set_printoptions(threshold=numpy.nan)
 #     print(ol_win_data('../data/games.xml'))
-    ol_move_data('../data/games.xml')
+    ol_win_data('../data/games.xml')
 #     a = numpy.zeros(15*15).reshape((15, 15))
 #     a[[4, 5, 6]] = 1
 #     b = []
