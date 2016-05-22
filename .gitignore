@@ -6,5 +6,6 @@
 *res
 .DS_Store
 output
-test_results
+*test_results
+*test_case*
 *pkl

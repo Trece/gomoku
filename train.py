@@ -238,9 +238,9 @@ def ol_win_data(filename):
     '''
     tree = ET.parse(filename)
     root = tree.getroot()
-    N = 500
-    n_validate = 100
-    n_test = 100
+    N = 50000
+    n_validate = 5000
+    n_test = 1000
     n_train = N - n_validate - n_test
     if DEBUG:
         root = root[:N]
@@ -256,6 +256,7 @@ def ol_win_data(filename):
         if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
             continue
         for direction in range(8):
+            data.append(game_pos(board_string, winside, direction))
             data.append(game_pos(board_string, winside, direction))
     print("total data: {}".format(len(data)))
     shuffle(data)
@@ -274,8 +275,8 @@ def ol_win_data(filename):
         if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
             continue
         v_data.append(game_pos(board_string, winside))
-    v_data_x = [d[0].reshape(2*15*15) for d in data]
-    v_data_y = [d[1] for d in data]
+    v_data_x = [d[0].reshape(2*15*15) for d in v_data]
+    v_data_y = [d[1] for d in v_data]
 
     t_data = []
     for i, game in enumerate(root[-n_test:]):
@@ -289,15 +290,15 @@ def ol_win_data(filename):
         if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
             continue
         t_data.append(game_pos(board_string, winside))
-    t_data_x = [d[0].reshape(2*15*15) for d in data]
-    t_data_y = [d[1] for d in data]
+
+    t_data_x = [d[0].reshape(2*15*15) for d in t_data]
+    t_data_y = [d[1] for d in t_data]
     
     n_train = n_train * 8
 
     print('total train data: {}'.format(n_train))
     with open('win_test_results', 'w') as f:
         print(t_data_y, file=f)
-    test_xy = (data_x[n_validate:n_test], data_y[n_validate:n_test])
     with open('win_test_case.pkl', 'wb') as f:
         pickle.dump(t_data, f)
     train_x, train_y = shared_dataset((data_x,

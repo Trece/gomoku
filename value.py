@@ -19,7 +19,7 @@ from .convolutional_mlp import LeNetConvPoolLayer
 numpy.set_printoptions(threshold=numpy.nan)
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 1], batch_size=20):
+    def __init__(self, nkerns=[100, 100, 100, 1], batch_size=1):
         '''
         nkerns: an array representing how many filters each layer has
         batch_size: a integer indicates batch size
@@ -66,23 +66,32 @@ class ConvNetwork:
             filter_shape=(nkerns[2], nkerns[1], 5, 5),
             poolsize=(1, 1))
 
-        layer3_input = self.layer2.output.flatten(2)
+        self.layer3 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer2.output,
+            image_shape=(self.batch_size, nkerns[2], 15, 15),
+            filter_shape=(nkerns[3], nkerns[2], 5, 5),
+            poolsize=(1, 1),
+            activate=None)
 
-#         self.layer3 = HiddenLayer(
-#             self.rng,
-#             input=layer3_input,
-#             n_in=nkerns[2]*15*15,
-#             n_out=128,
-#             activation=T.nnet.relu)
+        layer4_input = self.layer3.output.flatten(2)
+
+        self.layer4 = HiddenLayer(
+            self.rng,
+            input=layer4_input,
+            n_in=nkerns[3]*15*15,
+            n_out=128,
+            activation=T.nnet.relu)
         
-        self.layer3 = LinearNetwork(
-            layer3_input,
-            nkerns[2]*15*15)
+        self.layer5 = LinearNetwork(
+            self.layer4.output,
+            128)
         
-        self.final_output = self.layer3.output
+        self.final_output = self.layer5.output
 
         # add up all the parameters
-        self.params = (self.layer3.params + self.layer2.params
+        self.params = (self.layer5.params + self.layer4.params
+                       + self.layer3.params + self.layer2.params
                        + self.layer1.params + self.layer0.params)
 
     def train(self, train_sets, valid_sets, test_sets, 
@@ -143,6 +152,24 @@ class ConvNetwork:
                 }
             )
         
+        actual_result = theano.function(
+            [index],
+            self.y,
+            givens={
+                x:train_set_x[index * batch_size: (index + 1) * batch_size],
+                y:train_set_y[index * batch_size: (index + 1) * batch_size]
+                },
+            on_unused_input='warn',
+            )
+
+        prediction = theano.function(
+            [index],
+            self.final_output,
+            givens={
+                x:train_set_x[index * batch_size: (index + 1) * batch_size]
+                }
+            )
+
         print('... training')
         # early-stopping parameters
         patience = 10000  # look as this many examples regardless
@@ -164,23 +191,30 @@ class ConvNetwork:
 
         while (epoch < n_epochs):
             epoch = epoch + 1
+            training_loss = []
             for minibatch_index in range(n_train_batches):
                 
                 iter = (epoch - 1) * n_train_batches + minibatch_index
-            
+                
                 cost_ij = train_model(minibatch_index)
-                if iter % 100 == 0:
-                    print('training @ iter = ', iter, flush=True)
-                    print('cost = ', cost_ij.mean(), flush=True)
+                training_loss.append(cost_ij)
+                if iter % 1 == 0:
+                    print('training @ iter = ', iter)
+                    print('cost = {}'.format(cost_ij))
+                    print('y = {}'.format(actual_result(minibatch_index)))
+                    print('prediction is {}'.format(prediction(minibatch_index)))
+                    print('', flush=True)
                 if (iter + 1) % validation_frequency == 0:
 
                     # compute zero-one loss on validation set
                     validation_losses = [validate_model(i) for i
                                          in range(n_valid_batches)]
                     this_validation_loss = numpy.mean(validation_losses)
-                    print('epoch {}, minibatch {}/{}, validation MSE {}'.format(
+                    this_training_loss = numpy.mean(numpy.array(training_loss))
+                    print('epoch {}, minibatch {}/{}, validation MSE {}, training MSE{}'.format(
                             epoch, minibatch_index + 1, n_train_batches,
-                            this_validation_loss))
+                            this_validation_loss, this_training_loss))
+                    training_loss = []
                     with open('model_{}.mod'.format(iter), 'wb') as f:
                         pickle.dump(self.dump(), f)
                     # if we got the best validation score until now
@@ -245,6 +279,13 @@ class ConvNetwork:
         for p, value in zip(self.params, values):
             p.set_value(value)
 
+    def load_file(self, filename='cur.mod'):
+        directory = __file__.split('/')[:-1]
+        directory.append(filename)
+        modfile = '/'.join(directory)
+        print(modfile)
+        self.load(pickle.load(open(modfile, 'rb')))
+
 if __name__ == '__main__':
     network = ConvNetwork()
     if len(sys.argv) > 1:
@@ -253,7 +294,7 @@ if __name__ == '__main__':
         network.load(params)
         print('using {} as a start'.format(filename))
     datasets = ol_win_data('../data/games.xml')
-    network.train(datasets[0], datasets[1], datasets[2], n_epochs=50)
+    network.train(datasets[0], datasets[1], datasets[2], n_epochs=3)
 #     with open('trained.mod', 'rb') as savefile:
 #         network.load(pickle.load(savefile))
 #     p = network.predict(datasets[2][0])
