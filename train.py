@@ -80,16 +80,19 @@ def game2img(game, direction=0):
     board_white = numpy.zeros((15, 15), dtype='int32')
     
     board = numpy.array([board_black, board_white])
-    
+    if len(moves) > 5:
+        ending = len(moves)-5
+    else:
+        ending = 0
     b_data = []
     m_data = []
-    for move in moves[:OPENING_N]:
+    for move in moves[:ending]:
         i, j = move
         if board[turn][i][j] != 0:
             print('error')
         board[turn][i][j] = 1
         turn = 1 - turn
-    for move in moves[OPENING_N:]:
+    for move in moves[ending:]:
         b_data.append(deepcopy([board[turn], board[1-turn]]))
         m_data.append(move)
         i, j = move
@@ -168,13 +171,13 @@ def ol_move_data(filename):
         root = root[:N]
     data = []
 
-    n_validate = 5000
-    n_test = 500
+    n_validate = 100
+    n_test = 100
     
     # train set with symmetry
     for i, game in enumerate(root[:-n_validate-n_test]):
         board_string = game.find('board').text
-        if not board_string or'--' in board_string:
+        if (not board_string or'--' in board_string) or game.find('winby').text != 'five':
             pass
         else:
             for direction in range(8):
