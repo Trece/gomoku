@@ -80,19 +80,15 @@ def game2img(game, direction=0):
     board_white = numpy.zeros((15, 15), dtype='int32')
     
     board = numpy.array([board_black, board_white])
-    if len(moves) > 5:
-        ending = len(moves)-5
-    else:
-        ending = 0
     b_data = []
     m_data = []
-    for move in moves[:ending]:
+    for move in moves[:OPENING_N]:
         i, j = move
         if board[turn][i][j] != 0:
             print('error')
         board[turn][i][j] = 1
         turn = 1 - turn
-    for move in moves[ending:]:
+    for move in moves[OPENING_N:]:
         b_data.append(deepcopy([board[turn], board[1-turn]]))
         m_data.append(move)
         i, j = move

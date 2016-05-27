@@ -10,10 +10,10 @@ import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.nnet import conv2d
 
-from .logistic_sgd import load_data
-from .train import ol_move_data, shared_dataset
-from .mlp import HiddenLayer
-from .convolutional_mlp import LeNetConvPoolLayer
+from logistic_sgd import load_data
+from train import ol_move_data, shared_dataset
+from mlp import HiddenLayer
+from convolutional_mlp import LeNetConvPoolLayer
 
 # For debugging convenience set to print all numbers in the numpy array
 numpy.set_printoptions(threshold=numpy.nan)
@@ -118,7 +118,7 @@ class ConvNetwork:
             poolsize=(1, 1),
             activate=None)
 
-        self.final_output = T.nnet.softmax(self.layer8.output.flatten(2))
+        self.final_output = T.nnet.softmax(self.layer9.output.flatten(2))
 
         # add up all the parameters
         self.params = (self.layer9.params + self.layer8.params

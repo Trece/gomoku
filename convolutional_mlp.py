@@ -34,7 +34,7 @@ import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.nnet import conv2d
 
-from .mlp import HiddenLayer
+from mlp import HiddenLayer
 
 class LeNetConvPoolLayer:
     """Pool Layer of a convolutional network """
