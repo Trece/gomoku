@@ -19,7 +19,7 @@ from .convolutional_mlp import LeNetConvPoolLayer
 numpy.set_printoptions(threshold=numpy.nan)
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 50, 50, 25], batch_size=10):
+    def __init__(self, nkerns=[100, 100, 50, 50, 50, 50, 50, 50, 50], batch_size=1):
         '''
         nkerns: an array representing how many filters each layer has
         batch_size: a integer indicates batch size
@@ -63,37 +63,67 @@ class ConvNetwork:
             self.rng,
             input=self.layer1.output,
             image_shape=(self.batch_size, nkerns[1], 15, 15),
-            filter_shape=(nkerns[2], nkerns[1], 7, 7),
+            filter_shape=(nkerns[2], nkerns[1], 3, 3),
             poolsize=(1, 1))
 
         self.layer3 = LeNetConvPoolLayer(
             self.rng,
             input=self.layer2.output,
             image_shape=(self.batch_size, nkerns[2], 15, 15),
-            filter_shape=(nkerns[3], nkerns[2], 5, 5),
+            filter_shape=(nkerns[3], nkerns[2], 3, 3),
             poolsize=(1, 1))
     
         self.layer4 = LeNetConvPoolLayer(
             self.rng,
             input=self.layer3.output,
             image_shape=(self.batch_size, nkerns[3], 15, 15),
-            filter_shape=(nkerns[4], nkerns[3], 5, 5),
+            filter_shape=(nkerns[4], nkerns[3], 3, 3),
             poolsize=(1, 1))
 
-        # The final layer doesn't go through a rectifier,
-        # instead, it goes directly into a softmax
         self.layer5 = LeNetConvPoolLayer(
             self.rng,
             input=self.layer4.output,
             image_shape=(self.batch_size, nkerns[4], 15, 15),
-            filter_shape=(1, nkerns[4], 1, 1),
+            filter_shape=(nkerns[5], nkerns[4], 3, 3),
+            poolsize=(1, 1))
+
+        self.layer6 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer5.output,
+            image_shape=(self.batch_size, nkerns[5], 15, 15),
+            filter_shape=(nkerns[6], nkerns[5], 3, 3),
+            poolsize=(1, 1))
+
+        self.layer7 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer6.output,
+            image_shape=(self.batch_size, nkerns[6], 15, 15),
+            filter_shape=(nkerns[7], nkerns[6], 3, 3),
+            poolsize=(1, 1))
+
+        self.layer8 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer7.output,
+            image_shape=(self.batch_size, nkerns[7], 15, 15),
+            filter_shape=(nkerns[8], nkerns[7], 3, 3),
+            poolsize=(1, 1))
+
+        # The final layer doesn't go through a rectifier,
+        # instead, it goes directly into a softmax
+        self.layer9 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer8.output,
+            image_shape=(self.batch_size, nkerns[8], 15, 15),
+            filter_shape=(1, nkerns[8], 1, 1),
             poolsize=(1, 1),
             activate=None)
 
-        self.final_output = T.nnet.softmax(self.layer5.output.flatten(2))
+        self.final_output = T.nnet.softmax(self.layer8.output.flatten(2))
 
         # add up all the parameters
-        self.params = (self.layer5.params + self.layer4.params
+        self.params = (self.layer9.params + self.layer8.params
+                       + self.layer7.params + self.layer6.params
+                       + self.layer5.params + self.layer4.params
                        + self.layer3.params + self.layer2.params
                        + self.layer1.params + self.layer0.params)
 

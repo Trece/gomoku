@@ -81,8 +81,8 @@ def board_image(board):
     return board_img
 
 if __name__ == '__main__':
-    all_p = read_data('test_344999.res')
-    data_x, data_y = board_data('test_case.pkl')
+    all_p = read_data('non.res')
+    data_x, data_y = board_data('non_test_case.pkl')
     for n in range(40):
         board_img = BoardImg()
         x = data_x[n]
@@ -93,5 +93,5 @@ if __name__ == '__main__':
         board_img.acmove((y//15, y%15), BoardImg.green)
         p = all_p[225*n:225*(n+1)]
         board_img.predictions(p)
-        board_img.save('boardbeg_{}.png'.format(n))
+        board_img.save('non_{}.png'.format(n))
     
