@@ -19,7 +19,7 @@ from convolutional_mlp import LeNetConvPoolLayer
 numpy.set_printoptions(threshold=numpy.nan)
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 50, 50, 50, 50, 50, 50, 50], batch_size=1):
+    def __init__(self, nkerns=[100, 100, 50, 50, 50, 50, 50, 50, 50], batch_size=40):
         '''
         nkerns: an array representing how many filters each layer has
         batch_size: a integer indicates batch size
