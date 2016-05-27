@@ -173,7 +173,7 @@ def ol_move_data(filename):
     # train set with symmetry
     for i, game in enumerate(root[:-n_validate-n_test]):
         board_string = game.find('board').text
-        if (not board_string or'--' in board_string) or game.find('winby').text != 'five':
+        if (not board_string or'--' in board_string):
             pass
         else:
             for direction in range(8):
@@ -205,11 +205,11 @@ def ol_move_data(filename):
 
     print("total data: {}".format(len(data)))
     # print(data)
-    n_train = len(data) - n_validate - n_test
 
     MAX = 500000
     data_x = [x.reshape(2*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
+    print('total train moves: {}'.format(len(data_x)))
     length = (len(data_x)-1)//MAX
     data_x = [data_x[i*MAX:(i+1)*MAX] for i in range(length)]
     data_y = [data_y[i*MAX:(i+1)*MAX] for i in range(length)]
@@ -217,7 +217,6 @@ def ol_move_data(filename):
     v_data_y = [y[0]*15 + y[1] for d in v_data for y in d[1]]
     t_data_x = [x.reshape(2*15*15) for d in t_data for x in d[0]]
     t_data_y = [y[0]*15 + y[1] for d in t_data for y in d[1]]
-    print('total train moves: {}'.format(n_train))
     with open('test_results', 'w') as f:
         print(t_data_y, file=f)
     test_xy = (t_data_x, t_data_y)
