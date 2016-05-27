@@ -167,8 +167,8 @@ def ol_move_data(filename):
         root = root[:N]
     data = []
 
-    n_validate = 10000
-    n_test = 10000
+    n_validate = 500
+    n_test = 500
     
     # train set with symmetry
     for i, game in enumerate(root[:-n_validate-n_test]):
