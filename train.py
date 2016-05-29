@@ -67,6 +67,77 @@ def check_n(board, pos, n):
         
     return False
 
+def complex_board(boards):
+    directions = [(1, 0), (1, 1), (0, 1), (-1, 1), 
+                  (-1, 0), (-1, -1), (0, -1), (1, -1)]
+    boards = [numpy.array(boards[0], dtype='int'), 
+              numpy.array(boards[1], dtype='int')]
+    for i in range(2):
+        board = boards[i]
+        op_board = boards[1-i]
+        for r, c in directions:
+            x = [(1-board)*(1-op_board)]
+            for i in range(1, 5):
+                if r == 1:
+                    rp = (i, 0)
+                    ri = (0, 15)
+                elif r == -1:
+                    rp = (0, i)
+                    ri = (0+i, 15+i)
+                else:
+                    rp = (0, 0)
+                    ri = (0, 15)
+                if c == 1:
+                    cp = (i, 0)
+                    ci = (0, 15)
+                elif c == -1:
+                    cp = (0, i)
+                    ci = (0+i, 15+i)
+                else:
+                    cp = (0, 0)
+                    ci = (0, 15)
+                xi = numpy.pad(board, (rp, cp), 'constant', 
+                               constant_values=0)[ri[0]:ri[1], ci[0]:ci[1]]
+                x.append(xi)
+            for i in range(1, 5):
+                x[i] = x[i] * x[i-1]
+            for i in range(0, 4):
+                x[i] = x[i] * (1-x[i+1])
+            for i in range(1, 5):
+                boards.append(x[i])
+
+        for r, c in directions:
+            cop_board = 1-op_board
+            x = [cop_board*(1-board)]
+            for i in range(1, 5):
+                if r == 1:
+                    rp = (i, 0)
+                    ri = (0, 15)
+                elif r == -1:
+                    rp = (0, i)
+                    ri = (0+i, 15+i)
+                else:
+                    rp = (0, 0)
+                    ri = (0, 15)
+                if c == 1:
+                    cp = (i, 0)
+                    ci = (0, 15)
+                elif c == -1:
+                    cp = (0, i)
+                    ci = (0+i, 15+i)
+                else:
+                    cp = (0, 0)
+                    ci = (0, 15)
+                xi = numpy.pad(cop_board, (rp, cp), 'constant', 
+                               constant_values=0)[ri[0]:ri[1], ci[0]:ci[1]]
+                x.append(xi)
+            for i in range(1, 5):
+                x[i] = x[i] * x[i-1]
+            for i in range(0, 4):
+                x[i] = x[i] * (1-x[i+1])
+            for i in range(1, 5):
+                boards.append(x[i])
+
 
 def game2img(game, direction=0):
     '''
@@ -310,9 +381,9 @@ def ol_win_data(filename):
 
 
 if __name__ == '__main__':
-    numpy.set_printoptions(threshold=numpy.nan)
+#     numpy.set_printoptions(threshold=numpy.nan)
 #     print(ol_win_data('../data/games.xml'))
-    ol_win_data('../data/games.xml')
+#     ol_win_data('../data/games.xml')
 #     a = numpy.zeros(15*15).reshape((15, 15))
 #     a[[4, 5, 6]] = 1
 #     b = []
@@ -322,3 +393,11 @@ if __name__ == '__main__':
 #     x = numpy.array(b).reshape((15, 15))
 #     print(x)
     
+    board = [[[0 for i in range(15)] for j in range(15)] for k in range(2)]
+    board[0][3][4] = 1
+    board[0][4][5] = 1
+    board[0][4][4] = 1
+    board[0][5][6] = 1
+    board[0][6][7] = 1
+    board[1][2][3] = 1
+    complex_board(board)

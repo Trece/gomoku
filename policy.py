@@ -43,20 +43,20 @@ class ConvNetwork:
         Before feeding intput into the next layer, they are padded 
         such that All layers' outputs have exact size 15*15
         '''
-        self.layer0_input = self.x.reshape((self.batch_size, 2, 15, 15))
+        self.layer0_input = self.x.reshape((self.batch_size, 130, 15, 15))
 
         self.layer0 = LeNetConvPoolLayer(
             self.rng,
             input=self.layer0_input,
-            image_shape=(self.batch_size, 2, 15, 15),
-            filter_shape=(nkerns[0], 2, 11, 11),
+            image_shape=(self.batch_size, 130, 15, 15),
+            filter_shape=(nkerns[0], 130, 5, 5),
             poolsize=(1, 1))
 
         self.layer1 = LeNetConvPoolLayer(
             self.rng,
             input=self.layer0.output,
             image_shape=(self.batch_size, nkerns[0], 15, 15),
-            filter_shape=(nkerns[1], nkerns[0], 7, 7),
+            filter_shape=(nkerns[1], nkerns[0], 3, 3),
             poolsize=(1, 1))
 
         self.layer2 = LeNetConvPoolLayer(
@@ -185,6 +185,16 @@ class ConvNetwork:
                 y: train_set_y[index * batch_size: (index + 1) * batch_size]
                 }
             )
+
+        train_error = theano.function(
+            [index],
+            error,
+            givens={
+                x: train_set_x[index * batch_size: (index + 1) * batch_size],
+                y: train_set_y[index * batch_size: (index + 1) * batch_size]
+                }
+            )
+
         
         print('... training')
         # early-stopping parameters
@@ -211,10 +221,11 @@ class ConvNetwork:
                 
                 iter = (epoch - 1) * n_train_batches + minibatch_index
             
-                if iter % 100 == 0:
-                    print('training @ iter = ', iter, flush=True)
                 cost_ij = train_model(minibatch_index)
-
+                if iter % 100 == 0:
+                    print('training @ iter = ', iter)
+                    print('cost is {}'.format(cost_ij))
+                    print('error is {}'.format(train_error(iter)), flush=True)
                 if (iter + 1) % validation_frequency == 0:
 
                     # compute zero-one loss on validation set
