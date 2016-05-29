@@ -63,34 +63,56 @@ class ConvNetwork:
             self.rng,
             input=self.layer1.output,
             image_shape=(self.batch_size, nkerns[1], 15, 15),
-            filter_shape=(nkerns[2], nkerns[1], 5, 5),
+            filter_shape=(nkerns[2], nkerns[1], 3, 3),
             poolsize=(1, 1))
 
         self.layer3 = LeNetConvPoolLayer(
             self.rng,
             input=self.layer2.output,
             image_shape=(self.batch_size, nkerns[2], 15, 15),
-            filter_shape=(nkerns[3], nkerns[2], 5, 5),
+            filter_shape=(nkerns[3], nkerns[2], 3, 3),
+            poolsize=(1, 1))
+
+        self.layer4 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer3.output,
+            image_shape=(self.batch_size, nkerns[3], 15, 15),
+            filter_shape=(nkerns[4], nkerns[3], 3, 3),
+            poolsize=(1, 1))
+
+        self.layer5 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer4.output,
+            image_shape=(self.batch_size, nkerns[4], 15, 15),
+            filter_shape=(nkerns[5], nkerns[4], 3, 3),
+            poolsize=(1, 1))
+
+        self.layer6 = LeNetConvPoolLayer(
+            self.rng,
+            input=self.layer5.output,
+            image_shape=(self.batch_size, nkerns[5], 15, 15),
+            filter_shape=(1, nkerns[5], 3, 3),
             poolsize=(1, 1),
             activate=None)
 
-        layer4_input = self.layer3.output.flatten(2)
+        layer7_input = self.layer6.output.flatten(2)
 
-        self.layer4 = HiddenLayer(
+        self.layer7 = HiddenLayer(
             self.rng,
-            input=layer4_input,
-            n_in=nkerns[3]*15*15,
+            input=layer7_input,
+            n_in=15*15,
             n_out=128,
             activation=T.nnet.relu)
         
-        self.layer5 = LinearNetwork(
+        self.layer8 = LinearNetwork(
             self.layer4.output,
             128)
         
-        self.final_output = self.layer5.output
+        self.final_output = self.layer8.output
 
         # add up all the parameters
-        self.params = (self.layer5.params + self.layer4.params
+        self.params = (self.layer8.params + self.layer7.params + self.layer6.params
+                       + self.layer5.params + self.layer4.params
                        + self.layer3.params + self.layer2.params
                        + self.layer1.params + self.layer0.params)
 

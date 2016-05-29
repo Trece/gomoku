@@ -308,8 +308,8 @@ def ol_win_data(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     N = 50000
-    n_validate = 5000
-    n_test = 1000
+    n_validate = 2000
+    n_test = 2000
     n_train = N - n_validate - n_test
     if DEBUG:
         root = root[:N]
@@ -325,6 +325,9 @@ def ol_win_data(filename):
         if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
             continue
         for direction in range(8):
+            data.append(game_pos(board_string, winside, direction))
+            data.append(game_pos(board_string, winside, direction))
+            data.append(game_pos(board_string, winside, direction))
             data.append(game_pos(board_string, winside, direction))
             data.append(game_pos(board_string, winside, direction))
     print("total data: {}".format(len(data)))
