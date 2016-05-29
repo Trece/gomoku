@@ -10,16 +10,16 @@ import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.nnet import conv2d
 
-from .logistic_sgd import load_data, LinearNetwork
-from .train import ol_win_data
-from .mlp import HiddenLayer
-from .convolutional_mlp import LeNetConvPoolLayer
+from logistic_sgd import load_data, LinearNetwork
+from train import ol_win_data
+from mlp import HiddenLayer
+from convolutional_mlp import LeNetConvPoolLayer
 
 # For debugging convenience set to print all numbers in the numpy array
 numpy.set_printoptions(threshold=numpy.nan)
 
 class ConvNetwork:
-    def __init__(self, nkerns=[100, 100, 100, 1], batch_size=1):
+    def __init__(self, nkerns=[150, 100, 50, 50, 50, 50], batch_size=1):
         '''
         nkerns: an array representing how many filters each layer has
         batch_size: a integer indicates batch size
