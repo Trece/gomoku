@@ -105,7 +105,7 @@ class ConvNetwork:
             activation=T.nnet.relu)
         
         self.layer8 = LinearNetwork(
-            self.layer4.output,
+            self.layer7.output,
             128)
         
         self.final_output = self.layer8.output
