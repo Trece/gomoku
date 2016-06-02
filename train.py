@@ -339,7 +339,7 @@ def ol_move_data(filename):
     print("total data: {}".format(len(data)))
     # print(data)
 
-    MAX = 500000
+    MAX = 50000
     data_x = [x.reshape(98*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
     print('total train moves: {}'.format(len(data_x)))
