@@ -67,77 +67,149 @@ def check_n(board, pos, n):
         
     return False
 
-def complex_board(boards):
-    directions = [(1, 0), (1, 1), (0, 1), (-1, 1), 
-                  (-1, 0), (-1, -1), (0, -1), (1, -1)]
-    boards = [numpy.array(boards[0], dtype='int'), 
-              numpy.array(boards[1], dtype='int')]
-    for i in range(2):
-        board = boards[i]
-        op_board = boards[1-i]
-        for r, c in directions:
-            x = [(1-board)*(1-op_board)]
-            for i in range(1, 5):
-                if r == 1:
-                    rp = (i, 0)
-                    ri = (0, 15)
-                elif r == -1:
-                    rp = (0, i)
-                    ri = (0+i, 15+i)
-                else:
-                    rp = (0, 0)
-                    ri = (0, 15)
-                if c == 1:
-                    cp = (i, 0)
-                    ci = (0, 15)
-                elif c == -1:
-                    cp = (0, i)
-                    ci = (0+i, 15+i)
-                else:
-                    cp = (0, 0)
-                    ci = (0, 15)
-                xi = numpy.pad(board, (rp, cp), 'constant', 
-                               constant_values=0)[ri[0]:ri[1], ci[0]:ci[1]]
-                x.append(xi)
-            for i in range(1, 5):
-                x[i] = x[i] * x[i-1]
-            for i in range(0, 4):
-                x[i] = x[i] * (1-x[i+1])
-            for i in range(1, 5):
-                boards.append(x[i])
+def error(s):
+    print('error: {}'.format(s))
 
-        for r, c in directions:
-            cop_board = 1-op_board
-            x = [cop_board*(1-board)]
-            for i in range(1, 5):
-                if r == 1:
-                    rp = (i, 0)
-                    ri = (0, 15)
-                elif r == -1:
-                    rp = (0, i)
-                    ri = (0+i, 15+i)
-                else:
-                    rp = (0, 0)
-                    ri = (0, 15)
-                if c == 1:
-                    cp = (i, 0)
-                    ci = (0, 15)
-                elif c == -1:
-                    cp = (0, i)
-                    ci = (0+i, 15+i)
-                else:
-                    cp = (0, 0)
-                    ci = (0, 15)
-                xi = numpy.pad(cop_board, (rp, cp), 'constant', 
-                               constant_values=0)[ri[0]:ri[1], ci[0]:ci[1]]
-                x.append(xi)
-            for i in range(1, 5):
-                x[i] = x[i] * x[i-1]
-            for i in range(0, 4):
-                x[i] = x[i] * (1-x[i+1])
-            for i in range(1, 5):
-                boards.append(x[i])
+class ComplexBoard:
+    def __init__(self):
+        self.black_board = [[0 for i in range(15)] for j in range(15)]
+        self.white_board = [[0 for i in range(15)] for j in range(15)]
+        self.b_data = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
+        self.w_data = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
+        self.b_blocked = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
+        self.w_blocked = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
+        
+    def move(self, pos, side):
+        dir = [(1, 0), (1, 1), (0, 1), (-1, 1)]
+        if side == 0:
+            my_board = self.black_board
+            op_board = self.white_board
+            my_data = self.b_data
+            op_data = self.w_data
+            my_blocked = self.b_blocked
+            op_blocked = self.w_blocked
+        else:
+            my_board = self.white_board
+            op_board = self.black_board
+            my_data = self.w_data
+            op_data = self.b_data
+            my_blocked = self.w_blocked
+            op_blocked = self.b_blocked
+        x, y = pos
+        if my_board[x][y] != 0:
+            error('already occupied')
+        my_board[x][y] = 1
 
+        # set all threats to 0 at this point
+        for i in range(4):
+            my_data[i][x][y] = 0
+            my_blocked[i][x][y] = 0
+            op_data[i][x][y] = 0
+            op_blocked[i][x][y] = 0
+
+        for i in range(4):
+            dx, dy = dir[i]
+            p_blocked = 0
+            p = 1
+            for j in range(1, 15):
+                xi = x + j*dx
+                yi = y + j*dy
+                if (xi < 0 or xi > 14 or
+                    yi < 0 or yi > 14 or
+                    op_board[xi][yi] == 1):
+                    p_blocked = 1
+                    break
+                elif my_board[xi][yi] == 1:
+                    p += 1
+                else:
+                    break
+            n_blocked = 0
+            n = 1
+            for j in range(1, 15):
+                xi = x - j*dx
+                yi = y - j*dy
+                if (xi < 0 or xi > 14 or
+                    yi < 0 or yi > 14 or
+                    op_board[xi][yi] == 1):
+                    n_blocked = 1
+                    break
+                elif my_board[xi][yi] == 1:
+                    n += 1
+                else:
+                    break
+
+            if not p_blocked:
+                pxi = x + p*dx
+                pyi = y + p*dy
+                my_data[i][pxi][pyi] += n
+                if n_blocked:
+                    my_blocked[i][pxi][pyi] += 1
+#                 if i == 2 and pxi == 8 and pyi == 11:
+#                     import pdb
+#                     pdb.set_trace()
+            if not n_blocked:
+                nxi = x - n*dx
+                nyi = y - n*dy
+                my_data[i][nxi][nyi] += p
+                if p_blocked:
+                    my_blocked[i][nxi][nyi] += 1
+#                 if i == 2 and nxi == 8 and nyi == 11:
+#                     import pdb
+#                     pdb.set_trace()
+            
+            for j in range(1, 15):
+                xi = x + j*dx
+                yi = y + j*dy
+                if (xi < 0 or xi > 14 or
+                    yi < 0 or yi > 14):
+                    break
+                elif op_board[xi][yi] != 1:
+                    if my_board[xi][yi] == 0:
+                        op_blocked[i][xi][yi] += 1
+                    break
+                    
+            
+    def data(self, side):
+        if side == 0:
+            my_board = self.black_board
+            op_board = self.white_board
+            my_data = self.b_data
+            op_data = self.w_data
+            my_blocked = self.b_blocked
+            op_blocked = self.w_blocked
+        else:
+            my_board = self.white_board
+            op_board = self.black_board
+            my_data = self.w_data
+            op_data = self.b_data
+            my_blocked = self.w_blocked
+            op_blocked = self.b_blocked
+
+        my_d = [[[[[0 for i in range(15)] for j in range(15)] 
+               for k in range(3)] for m in range(4)] for s in range(4)]
+        for direction in range(4):
+            for i in range(15):
+                for j in range(15):
+                    n = my_data[direction][i][j]
+                    b = my_blocked[direction][i][j]
+                    if n > 0 and n < 4:
+                        my_d[direction][n-1][b][i][j] = 1
+                    if n >= 4:
+                        my_d[direction][3][b][i][j] = 1
+        
+        op_d = [[[[[0 for i in range(15)] for j in range(15)] 
+               for k in range(3)] for m in range(4)] for s in range(4)]
+        for direction in range(4):
+            for i in range(15):
+                for j in range(15):
+                    n = my_data[direction][i][j]
+                    b = my_blocked[direction][i][j]
+                    if n > 0 and n < 4:
+                        op_d[direction][n-1][b][i][j] = 1
+                    if n >= 4:
+                        op_d[direction][3][b][i][j] = 1
+
+        return numpy.array([my_board, op_board, my_d, op_d])
 
 def game2img(game, direction=0):
     '''
@@ -147,27 +219,18 @@ def game2img(game, direction=0):
     '''
     moves = [moveindex(move, direction) for move in game.split()]
     turn = 0
-    board_black = numpy.zeros((15, 15), dtype='int32')
-    board_white = numpy.zeros((15, 15), dtype='int32')
-    
-    board = numpy.array([board_black, board_white])
+    board = ComplexBoard()
     b_data = []
     m_data = []
+    
     for move in moves[:OPENING_N]:
-        i, j = move
-        if board[turn][i][j] != 0:
-            print('error')
-        board[turn][i][j] = 1
+        board.move(move, turn)
         turn = 1 - turn
     for move in moves[OPENING_N:]:
-        b_data.append(deepcopy([board[turn], board[1-turn]]))
+        b_data.append(board.data(turn))
         m_data.append(move)
-        i, j = move
-        if board[turn][i][j] != 0:
-            print('error')
-        board[turn][i][j] = 1
+        board.move(move, turn)
         turn = 1 - turn
-
     return numpy.array(b_data), m_data
 
 def game_pos(game, winside, direction=0):
@@ -199,7 +262,7 @@ def game_pos(game, winside, direction=0):
     if num % 2 == 1:
         board = board[1], board[0]
         y = -y
-    return numpy.array(board), y
+    return board, y
 
 def shared_dataset(data_xy, borrow=True):
     """ Function that loads the dataset into shared variables
@@ -233,7 +296,7 @@ def ol_move_data(filename):
     '''
     tree = ET.parse(filename)
     root = tree.getroot()
-    N = 50000
+    N = 10000
     if DEBUG:
         root = root[:N]
     data = []
@@ -249,8 +312,7 @@ def ol_move_data(filename):
         else:
             for direction in range(8):
                 data.append(game2img(board_string, direction=direction))
-        if i % 50 == 0:
-            print('no{}'.format(i))
+        print('no{}'.format(i))
     shuffle(data)
     print(len(data))
     v_data = []
@@ -278,15 +340,15 @@ def ol_move_data(filename):
     # print(data)
 
     MAX = 500000
-    data_x = [x.reshape(2*15*15) for d in data for x in d[0]]
+    data_x = [x.reshape(98*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
     print('total train moves: {}'.format(len(data_x)))
     length = (len(data_x)-1)//MAX
     data_x = [data_x[i*MAX:(i+1)*MAX] for i in range(length)]
     data_y = [data_y[i*MAX:(i+1)*MAX] for i in range(length)]
-    v_data_x = [x.reshape(2*15*15) for d in v_data for x in d[0]]
+    v_data_x = [x.reshape(98*15*15) for d in v_data for x in d[0]]
     v_data_y = [y[0]*15 + y[1] for d in v_data for y in d[1]]
-    t_data_x = [x.reshape(2*15*15) for d in t_data for x in d[0]]
+    t_data_x = [x.reshape(98*15*15) for d in t_data for x in d[0]]
     t_data_y = [y[0]*15 + y[1] for d in t_data for y in d[1]]
     with open('test_results', 'w') as f:
         print(t_data_y, file=f)
@@ -395,12 +457,4 @@ if __name__ == '__main__':
 #             b.append(1 if check_n(a, (i, j), 5) else 0)
 #     x = numpy.array(b).reshape((15, 15))
 #     print(x)
-    
-    board = [[[0 for i in range(15)] for j in range(15)] for k in range(2)]
-    board[0][3][4] = 1
-    board[0][4][5] = 1
-    board[0][4][4] = 1
-    board[0][5][6] = 1
-    board[0][6][7] = 1
-    board[1][2][3] = 1
-    complex_board(board)
+    ol_move_data('../data/games.xml')
