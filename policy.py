@@ -43,7 +43,7 @@ class ConvNetwork:
         Before feeding intput into the next layer, they are padded 
         such that All layers' outputs have exact size 15*15
         '''
-        self.layer0_input = self.x.reshape((self.batch_size, 2, 15, 15))
+        self.layer0_input = self.x.reshape((self.batch_size, 98, 15, 15))
 
         self.layer0 = LeNetConvPoolLayer(
             self.rng,
