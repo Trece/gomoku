@@ -208,8 +208,10 @@ class ComplexBoard:
                         op_d[direction][n-1][b][i][j] = 1
                     if n >= 4:
                         op_d[direction][3][b][i][j] = 1
-
-        return numpy.array([my_board, op_board, my_d, op_d])
+        my_d = [x for z in my_d for y in z for x in y]
+        op_d = [x for z in op_d for y in z for x in y]
+        x = [my_board, op_board]+my_d+op_d
+        return numpy.array(x)
 
 def game2img(game, direction=0):
     '''
@@ -338,8 +340,8 @@ def ol_move_data(filename):
 
     print("total data: {}".format(len(data)))
     # print(data)
-
-    MAX = 50000
+    print(data[0][1])
+    MAX = 50
     data_x = [x.reshape(98*15*15) for d in data for x in d[0]]
     data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
     print('total train moves: {}'.format(len(data_x)))
