@@ -315,8 +315,7 @@ def ol_move_data(filename):
             pass
         else:
             game_strings.append(board_string)
-    shuffle(data)
-    print(len(data))
+    shuffle(game_strings)
     v_data = []
     # test set with no symmetry
     for i, game in enumerate(root[-n_validate-n_test:-n_test]):
