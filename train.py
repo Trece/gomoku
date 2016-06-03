@@ -303,8 +303,8 @@ def ol_move_data(filename):
         root = root[:N]
     data = []
 
-    n_validate = 1000
-    n_test = 1000
+    n_validate = 100
+    n_test = 100
 
     game_strings = []
     
