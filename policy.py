@@ -314,9 +314,8 @@ if __name__ == '__main__':
         network.load(params)
         print('using {} as a start'.format(filename))
     datasets = ol_move_data('../data/games.xml')
-    train_sets, valid_set, test_set = datasets
-    for x, y in zip(train_sets[0], train_sets[1]):
-        network.train(shared_dataset((x, y)), valid_set, test_set, n_epochs=1)
+    for train_set, valid_set, test_set in datasets:
+        network.train(train_set, valid_set, test_set, n_epochs=1)
 #     with open('trained.mod', 'rb') as savefile:
 #         network.load(pickle.load(savefile))
 #     p = network.predict(datasets[2][0])

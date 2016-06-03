@@ -298,13 +298,15 @@ def ol_move_data(filename):
     '''
     tree = ET.parse(filename)
     root = tree.getroot()
-    N = 10000
+    N = 40000
     if DEBUG:
         root = root[:N]
     data = []
 
-    n_validate = 500
-    n_test = 500
+    n_validate = 1000
+    n_test = 1000
+
+    game_strings = []
     
     # train set with symmetry
     for i, game in enumerate(root[:-n_validate-n_test]):
@@ -312,9 +314,7 @@ def ol_move_data(filename):
         if (not board_string or'--' in board_string):
             pass
         else:
-            for direction in range(8):
-                data.append(game2img(board_string, direction=direction))
-        print('no{}'.format(i))
+            game_strings.append(board_string)
     shuffle(data)
     print(len(data))
     v_data = []
@@ -340,14 +340,7 @@ def ol_move_data(filename):
 
     print("total data: {}".format(len(data)))
     # print(data)
-    print(data[0][1])
     MAX = 50
-    data_x = [x.reshape(98*15*15) for d in data for x in d[0]]
-    data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
-    print('total train moves: {}'.format(len(data_x)))
-    length = (len(data_x)-1)//MAX
-    data_x = [data_x[i*MAX:(i+1)*MAX] for i in range(length)]
-    data_y = [data_y[i*MAX:(i+1)*MAX] for i in range(length)]
     v_data_x = [x.reshape(98*15*15) for d in v_data for x in d[0]]
     v_data_y = [y[0]*15 + y[1] for d in v_data for y in d[1]]
     t_data_x = [x.reshape(98*15*15) for d in t_data for x in d[0]]
@@ -361,8 +354,19 @@ def ol_move_data(filename):
                                              v_data_y))
     test_x, test_y = shared_dataset((t_data_x,
                                      t_data_y))
-    rval = [(data_x, data_y), (validate_x, validate_y), (test_x, test_y)]
-    return rval
+    length = len(game_strings)//MAX
+    for round in range(length):
+        data = []
+        for i in range(MAX):
+            for d in range(8):
+                data.append(game2img(game_strings[round*MAX+i], d))
+        shuffle(data)
+        data_x = [x.reshape(98*15*15) for d in data for x in d[0]]
+        data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
+        print(len(data))
+        train_x, train_y = shared_dataset((data_x, data_y))
+        rval = [(train_x, train_y), (validate_x, validate_y), (test_x, test_y)]
+        yield rval
 
 def ol_win_data(filename):
     '''
