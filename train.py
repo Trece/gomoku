@@ -213,6 +213,9 @@ class ComplexBoard:
                 for j in range(15):
                     n = my_data[direction][i][j]
                     b = my_blocked[direction][i][j]
+                    if b >= 3:
+                        print(my_board)
+                        print(op_board)
                     if n > 0 and n < 4:
                         op_d[direction][n-1][b][i][j] = 1
                     if n >= 4:
