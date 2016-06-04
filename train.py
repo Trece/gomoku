@@ -78,7 +78,7 @@ class ComplexBoard:
         self.w_data = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
         self.b_blocked = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
         self.w_blocked = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
-        
+
     def move(self, pos, side):
         dir = [(1, 0), (1, 1), (0, 1), (-1, 1)]
         if side == 0:
@@ -167,6 +167,15 @@ class ComplexBoard:
                     if my_board[xi][yi] == 0:
                         op_blocked[i][xi][yi] += 1
                     break
+            for j in range(1, 15):
+                xi = x - j*dx
+                yi = y - j*dy
+                if (xi < 0 or xi > 14 or
+                    yi < 0 or yi > 14):
+                    break
+                elif op_board[xi][yi] != 1:
+                    if my_board[xi][yi] == 0:
+                        op_blocked[i][xi][yi] += 1
                     
             
     def data(self, side):
