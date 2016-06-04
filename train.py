@@ -176,6 +176,7 @@ class ComplexBoard:
                 elif op_board[xi][yi] != 1:
                     if my_board[xi][yi] == 0:
                         op_blocked[i][xi][yi] += 1
+                    break
                     
             
     def data(self, side):
