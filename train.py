@@ -204,6 +204,8 @@ class ComplexBoard:
                     if b >= 3:
                         print(my_board)
                         print(op_board)
+                        print(my_blocked)
+                        print(my_data)
                     if n > 0 and n < 4:
                         my_d[direction][n-1][b][i][j] = 1
                     if n >= 4:
