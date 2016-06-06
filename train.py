@@ -223,8 +223,8 @@ class ComplexBoard:
         for direction in range(4):
             for i in range(15):
                 for j in range(15):
-                    n = my_data[direction][i][j]
-                    b = my_blocked[direction][i][j]
+                    n = op_data[direction][i][j]
+                    b = op_blocked[direction][i][j]
                     if n > 0 and n < 4:
                         op_d[direction][n-1][b][i][j] = 1
                     if n >= 4:
