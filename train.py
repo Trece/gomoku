@@ -72,6 +72,7 @@ def error(s):
 
 class ComplexBoard:
     def __init__(self):
+        self.turn = 0
         self.black_board = [[0 for i in range(15)] for j in range(15)]
         self.white_board = [[0 for i in range(15)] for j in range(15)]
         self.b_data = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
@@ -79,7 +80,10 @@ class ComplexBoard:
         self.b_blocked = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
         self.w_blocked = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
 
-    def move(self, pos, side):
+    def move(self, pos, side=None):
+        if side == None:
+            side = self.turn
+        self.turn = 1 - self.turn
         dir = [(1, 0), (1, 1), (0, 1), (-1, 1)]
         if side == 0:
             my_board = self.black_board
@@ -179,7 +183,9 @@ class ComplexBoard:
                     break
                     
             
-    def data(self, side):
+    def data(self, side=None):
+        if side == None:
+            side = self.turn
         if side == 0:
             my_board = self.black_board
             op_board = self.white_board
