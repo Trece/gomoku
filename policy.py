@@ -143,7 +143,7 @@ class ConvNetwork:
 
         cost = -T.mean(T.clip(T.log(
                     self.final_output[T.arange(self.y.shape[0]), self.y])
-                              -20, 0))
+                              ,-20, 0))
         error = T.mean(T.neq(T.argmax(self.final_output, axis=1), self.y))
 
         # find all the parameters and update them using gradient descent
