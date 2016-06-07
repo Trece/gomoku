@@ -79,7 +79,32 @@ class ComplexBoard:
         self.w_data = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
         self.b_blocked = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
         self.w_blocked = [[[0 for i in range(15)] for j in range(15)] for k in range(4)]
-
+        dir = [(1, 0), (1, 1), (0, 1), (-1, 1)]
+        for i in range(15):
+            for j in (0, 14):
+                self.b_blocked[0][j][i] = 1
+                self.b_blocked[2][i][j] = 1
+                self.b_blocked[1][j][i] = 1
+                self.b_blocked[1][i][j] = 1
+                self.b_blocked[3][j][i] = 1
+                self.b_blocked[3][i][j] = 1
+                self.w_blocked[0][j][i] = 1
+                self.w_blocked[2][i][j] = 1
+                self.w_blocked[1][i][j] = 1
+                self.w_blocked[1][j][i] = 1
+                self.w_blocked[3][i][j] = 1
+                self.w_blocked[3][j][i] = 1
+        self.b_blocked[3][0][0] = 2
+        self.b_blocked[1][0][14] = 2
+        self.b_blocked[1][14][0] = 2
+        self.b_blocked[3][14][14] = 2
+        self.w_blocked[3][0][0] = 2
+        self.w_blocked[1][0][14] = 2
+        self.w_blocked[1][14][0] = 2
+        self.w_blocked[3][14][14] = 2
+        import pdb
+        pdb.set_trace()
+        
     def move(self, pos, side=None):
         if side == None:
             side = self.turn
@@ -391,8 +416,79 @@ def ol_move_data(filename):
 def ol_win_data(filename):
     '''
     input: string
-    output: a random position of the board
+    output: a list of tuples per yield, each tuple represents a move
     '''
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    N = 40000
+    if DEBUG:
+        root = root[:N]
+    data = []
+
+    n_validate = 1000
+    n_test = 1000
+
+    game_strings = []
+    
+    # train set with symmetry
+    for i, game in enumerate(root[:-n_validate-n_test]):
+        board_string = game.find('board').text
+        if (not board_string or'--' in board_string):
+            pass
+        else:
+            game_strings.append(board_string)
+    shuffle(game_strings)
+    v_data = []
+    # test set with no symmetry
+    for i, game in enumerate(root[-n_validate-n_test:-n_test]):
+        board_string = game.find('board').text
+        if not board_string or'--' in board_string:
+            pass
+        else:
+            v_data.append(game2img(board_string))
+        if i % 50 == 0:
+            print('no{}'.format(i))
+
+    t_data = []
+    for i, game in enumerate(root[-n_test:]):
+        board_string = game.find('board').text
+        if not board_string or'--' in board_string:
+            pass
+        else:
+            t_data.append(game2img(board_string))
+        if i % 50 == 0:
+            print('no{}'.format(i))
+
+    print("total data: {}".format(len(data)))
+    # print(data)
+    MAX = 50
+    v_data_x = [x.reshape(98*15*15) for d in v_data for x in d[0]]
+    v_data_y = [y[0]*15 + y[1] for d in v_data for y in d[1]]
+    t_data_x = [x.reshape(98*15*15) for d in t_data for x in d[0]]
+    t_data_y = [y[0]*15 + y[1] for d in t_data for y in d[1]]
+    with open('test_results', 'w') as f:
+        print(t_data_y, file=f)
+    test_xy = (t_data_x, t_data_y)
+    with open('test_case.pkl', 'wb') as f:
+        pickle.dump(test_xy, f)
+    validate_x, validate_y = shared_dataset((v_data_x,
+                                             v_data_y))
+    test_x, test_y = shared_dataset((t_data_x,
+                                     t_data_y))
+    length = len(game_strings)//MAX
+    for round in range(length):
+        data = []
+        for i in range(MAX):
+            for d in range(8):
+                data.append(game2img(game_strings[round*MAX+i], d))
+        shuffle(data)
+        data_x = [x.reshape(98*15*15) for d in data for x in d[0]]
+        data_y = [y[0]*15 + y[1] for d in data for y in d[1]]
+        print(len(data))
+        train_x, train_y = shared_dataset((data_x, data_y))
+        rval = [(train_x, train_y), (validate_x, validate_y), (test_x, test_y)]
+        yield rval
+
     tree = ET.parse(filename)
     root = tree.getroot()
     N = 50000
