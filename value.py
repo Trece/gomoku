@@ -10,10 +10,10 @@ import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.nnet import conv2d
 
-from logistic_sgd import load_data, LinearNetwork
-from train import ol_win_data
-from mlp import HiddenLayer
-from convolutional_mlp import LeNetConvPoolLayer
+from .logistic_sgd import load_data, LinearNetwork
+from .train import ol_win_data
+from .mlp import HiddenLayer
+from .convolutional_mlp import LeNetConvPoolLayer
 
 # For debugging convenience set to print all numbers in the numpy array
 numpy.set_printoptions(threshold=numpy.nan)
