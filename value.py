@@ -316,7 +316,7 @@ if __name__ == '__main__':
         network.load(params)
         print('using {} as a start'.format(filename))
     for dataset in ol_win_data('../data/games.xml'):
-        network.train(dataset[0], dataset[1], dataset[2], n_epochs=3)
+        network.train(dataset[0], dataset[1], dataset[2], n_epochs=1)
 #     with open('trained.mod', 'rb') as savefile:
 #         network.load(pickle.load(savefile))
 #     p = network.predict(datasets[2][0])
