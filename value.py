@@ -43,20 +43,20 @@ class ConvNetwork:
         Before feeding intput into the next layer, they are padded 
         such that All layers' outputs have exact size 15*15
         '''
-        self.layer0_input = self.x.reshape((self.batch_size, 2, 15, 15))
+        self.layer0_input = self.x.reshape((self.batch_size, 98, 15, 15))
 
         self.layer0 = LeNetConvPoolLayer(
             self.rng,
             input=self.layer0_input,
-            image_shape=(self.batch_size, 2, 15, 15),
-            filter_shape=(nkerns[0], 2, 11, 11),
+            image_shape=(self.batch_size, 98, 15, 15),
+            filter_shape=(nkerns[0], 98, 7, 7),
             poolsize=(1, 1))
 
         self.layer1 = LeNetConvPoolLayer(
             self.rng,
             input=self.layer0.output,
             image_shape=(self.batch_size, nkerns[0], 15, 15),
-            filter_shape=(nkerns[1], nkerns[0], 7, 7),
+            filter_shape=(nkerns[1], nkerns[0], 5, 5),
             poolsize=(1, 1))
 
         self.layer2 = LeNetConvPoolLayer(
@@ -315,8 +315,8 @@ if __name__ == '__main__':
         params = pickle.load(open(filename, 'rb'))
         network.load(params)
         print('using {} as a start'.format(filename))
-    datasets = ol_win_data('../data/games.xml')
-    network.train(datasets[0], datasets[1], datasets[2], n_epochs=3)
+    for dataset in ol_win_data('../data/games.xml'):
+        network.train(dataset[0], dataset[1], dataset[2], n_epochs=3)
 #     with open('trained.mod', 'rb') as savefile:
 #         network.load(pickle.load(savefile))
 #     p = network.predict(datasets[2][0])

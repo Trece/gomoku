@@ -34,7 +34,7 @@ import theano
 import theano.tensor as T
 
 
-from .logistic_sgd import LogisticRegression, load_data
+from logistic_sgd import LogisticRegression, load_data
 
 
 # start-snippet-1
@@ -108,7 +108,7 @@ class HiddenLayer(object):
             else activation(lin_output)
         )
         # parameters of the model
-        self.params = [self.W, self.b]
+        self.params = [self.W]
 
 
 # start-snippet-2

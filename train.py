@@ -418,7 +418,6 @@ def ol_win_data(filename):
     N = 40000
     if DEBUG:
         root = root[:N]
-    data = []
 
     n_validate = 1000
     n_test = 1000
@@ -436,7 +435,7 @@ def ol_win_data(filename):
         if not reason in ['resign', 'five'] or not winside in ['black', 'white']:
             continue
         board_string = game.find('board').text
-        game_strings.append((board_string, reason))
+        game_strings.append((board_string, winside))
     shuffle(game_strings)
 
     v_data = []
@@ -484,14 +483,15 @@ def ol_win_data(filename):
     test_x, test_y = shared_dataset((t_data_x,
                                      t_data_y))
     length = len(game_strings)//MAX
-    import pdb
-    pdb.set_trace()
     for round in range(length):
+        data = []
         for i in range(MAX):
             for direction in range(8):
                 index = round*MAX + i
-                data.append(game_pos(game_strings[index][0], game_strings[1], direction))
-                data.append(game_pos(game_strings[index][0], game_strings[1], direction))
+                data.append(game_pos(game_strings[index][0], game_strings[index][1], direction))
+                data.append(game_pos(game_strings[index][0], game_strings[index][1], direction))
+        import pdb
+        pdb.set_trace()
         shuffle(data)
         data_x = [d[0].reshape(98*15*15) for d in data]
         data_y = [d[1] for d in data]

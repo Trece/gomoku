@@ -63,7 +63,7 @@ class LinearNetwork:
             borrow=True)
         self.output = activate(T.dot(input, self.W) + self.b)
         self.input = input
-        self.params = [self.W, self.b]
+        self.params = [self.W]
 
 class LogisticRegression(object):
     """Multi-class Logistic Regression Class
