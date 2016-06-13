@@ -489,7 +489,6 @@ def ol_win_data(filename):
             for direction in range(8):
                 index = round*MAX + i
                 data.append(game_pos(game_strings[index][0], game_strings[index][1], direction))
-                data.append(game_pos(game_strings[index][0], game_strings[index][1], direction))
         shuffle(data)
         data_x = [d[0].reshape(98*15*15) for d in data]
         data_y = [d[1] for d in data]
