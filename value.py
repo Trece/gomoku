@@ -73,23 +73,23 @@ class ConvNetwork:
             filter_shape=(nkerns[3], nkerns[2], 3, 3),
             poolsize=(1, 1))
 
-        self.layer4 = LeNetConvPoolLayer(
-            self.rng,
-            input=self.layer3.output,
-            image_shape=(self.batch_size, nkerns[3], 15, 15),
-            filter_shape=(nkerns[4], nkerns[3], 3, 3),
-            poolsize=(1, 1))
+#         self.layer4 = LeNetConvPoolLayer(
+#             self.rng,
+#             input=self.layer3.output,
+#             image_shape=(self.batch_size, nkerns[3], 15, 15),
+#             filter_shape=(nkerns[4], nkerns[3], 3, 3),
+#             poolsize=(1, 1))
 
-        self.layer5 = LeNetConvPoolLayer(
-            self.rng,
-            input=self.layer4.output,
-            image_shape=(self.batch_size, nkerns[4], 15, 15),
-            filter_shape=(nkerns[5], nkerns[4], 3, 3),
-            poolsize=(1, 1))
+#         self.layer5 = LeNetConvPoolLayer(
+#             self.rng,
+#             input=self.layer4.output,
+#             image_shape=(self.batch_size, nkerns[4], 15, 15),
+#             filter_shape=(nkerns[5], nkerns[4], 3, 3),
+#             poolsize=(1, 1))
 
         self.layer6 = LeNetConvPoolLayer(
             self.rng,
-            input=self.layer5.output,
+            input=self.layer3.output,
             image_shape=(self.batch_size, nkerns[5], 15, 15),
             filter_shape=(1, nkerns[5], 3, 3),
             poolsize=(1, 1),
@@ -112,7 +112,7 @@ class ConvNetwork:
 
         # add up all the parameters
         self.params = (self.layer8.params + self.layer7.params + self.layer6.params
-                       + self.layer5.params + self.layer4.params
+                       #+ self.layer5.params + self.layer4.params
                        + self.layer3.params + self.layer2.params
                        + self.layer1.params + self.layer0.params)
 
