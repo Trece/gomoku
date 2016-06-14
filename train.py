@@ -415,12 +415,12 @@ def ol_win_data(filename):
     '''
     tree = ET.parse(filename)
     root = tree.getroot()
-    N = 40000
+    N = 80000
     if DEBUG:
         root = root[:N]
 
-    n_validate = 1000
-    n_test = 1000
+    n_validate = 4000
+    n_test = 4000
 
     game_strings = []
     
@@ -428,7 +428,7 @@ def ol_win_data(filename):
     for i, game in enumerate(root[:-n_validate-n_test]):
         data = []
         board_string = game.find('board').text
-        if not board_string or'--' in board_string:
+        if not board_string or'--' in board_string or len(board_string.split()) <= 6:
             continue
         winside = game.find('winner').text
         reason = game.find('winby').text
@@ -444,7 +444,7 @@ def ol_win_data(filename):
         if i % 50 == 0:
             print('no{}'.format(i))
         board_string = game.find('board').text
-        if not board_string or'--' in board_string:
+        if not board_string or'--' in board_string or len(board_string.split()) <= 6:
             continue
         winside = game.find('winner').text
         reason = game.find('winby').text
@@ -459,7 +459,7 @@ def ol_win_data(filename):
         if i % 50 == 0:
             print('no{}'.format(i))
         board_string = game.find('board').text
-        if not board_string or'--' in board_string:
+        if not board_string or'--' in board_string or len(board_string.split()) <= 6:
             continue
         winside = game.find('winner').text
         reason = game.find('winby').text
