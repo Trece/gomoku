@@ -130,7 +130,7 @@ class ConvNetwork:
         n_valid_batches //= self.batch_size
         n_test_batches //= self.batch_size
 
-        cost = T.mean((self.final_output-self.y) ** 2)
+        cost = T.mean(abs(self.final_output-self.y))
         error = cost
 
         # find all the parameters and update them using gradient descent
